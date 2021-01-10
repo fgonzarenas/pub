@@ -9,19 +9,20 @@ public class Graph
 	private int nb_edges;
 
 	// Edges of a node can be accessed directly with it's id
-	private ArrayList<Node> nodes;
-	private ArrayList<ArrayList<Edge>> edges;
+	private final ArrayList<Node> nodes;
+	private final ArrayList<ArrayList<Edge>> edges;
 	
 	private NodeType n_type;
 	private EdgeType e_type;
 	
-	public final static int MAX_NODES = 10000;
+	public final static int MAX_NODES = 100;
+	public final static int MIN_NODES = 10;
 	public final static int MAX_CONNECT = 4;
 	public final static int MIN_EDGE_LEN = 1;
 	public final static int MAX_EDGE_LEN = 100;
 	
-	public final static int MAX_X = 1000;
-	public final static int MAX_Y = 1000;
+	public final static int MAX_X = 500;
+	public final static int MAX_Y = 500;
 	
 	public final Random rand;
 	
@@ -45,7 +46,7 @@ public class Graph
 	public Graph(NodeType n_type, EdgeType e_type)
 	{
 		rand = new Random(System.currentTimeMillis());
-		nb_nodes = rand.nextInt(MAX_NODES);
+		nb_nodes = rand.nextInt(MAX_NODES - MIN_NODES) + MIN_NODES;
 		
 		this.n_type = n_type;
 		this.e_type = e_type;
@@ -85,14 +86,14 @@ public class Graph
 		int n_roads = rand.nextInt(MAX_CONNECT) + 1;
 		Point cur_pos = nodes.get(cur_node).getPosition();
 		Tuple<Point, Edge> inter;
-	
+		
 		for(int i = 1; i <= n_roads && nodes.size() < nb_nodes; i++)
 		{	
 			// Create new road randomly
 			double len = rand.nextDouble() * MAX_EDGE_LEN + MIN_EDGE_LEN;
 			double angle = rand.nextDouble() * Math.PI * 2;
-			double x = Math.cos(angle) * len + cur_pos.getPosX();
-			double y = Math.sin(angle) * len + cur_pos.getPosY();
+			double x = Math.max(0, Math.min((Math.cos(angle) * len) + cur_pos.getPosX(), MAX_X));
+			double y = Math.max(0, Math.min((Math.sin(angle) * len) + cur_pos.getPosY(), MAX_Y));
 			Point dest_pos = new Point(x, y);
 			int id = nodes.size();
 			
@@ -110,7 +111,7 @@ public class Graph
 			}
 			
 			// Add new node and new road
-			nodes.add(Node.newInstance(n_type, id, len, angle));
+			nodes.add(Node.newInstance(n_type, id, x, y));
 			edges.get(cur_node).add(Edge.newInstance(e_type, len, cur_node, id));
 		}
 	}
@@ -156,10 +157,13 @@ public class Graph
 		return Math.sqrt(Math.pow(b.getPosX() - a.getPosX(), 2) + Math.pow(b.getPosY() - a.getPosY(), 2));
 	}
 	
-	public static void main(String args[])
+	public ArrayList<Node> getNodes()
 	{
-		Graph g = new Graph(NodeType.DEFAULT, EdgeType.DEFAULT);
-		g.init();
-		System.out.println("hi");
+		return nodes;
+	}
+	
+	public ArrayList<ArrayList<Edge>> getEdges()
+	{
+		return edges;
 	}
 }

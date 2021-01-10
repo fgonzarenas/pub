@@ -41,6 +41,10 @@ public abstract class Node
 		return position;
 	}
 	
+	public int getId()
+	{
+		return id;
+	}
 }
 
 class DefaultNode extends Node
