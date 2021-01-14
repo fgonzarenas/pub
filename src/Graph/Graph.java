@@ -3,20 +3,20 @@ package Graph;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Graph
+public abstract class Graph
 {
-	private int nb_nodes;
-	private int nb_edges;
+	protected int nb_nodes;
+	protected int nb_edges;
 
 	// Edges of a node can be accessed directly with it's id
-	private final ArrayList<Node> nodes;
-	private final ArrayList<ArrayList<Edge>> edges;
+	protected final ArrayList<Node> nodes;
+	protected final ArrayList<ArrayList<Edge>> edges;
 	
-	private NodeType n_type;
-	private EdgeType e_type;
+	protected NodeType n_type;
+	protected EdgeType e_type;
 	
 	public final static int MAX_NODES = 100;
-	public final static int MIN_NODES = 10;
+	public final static int MIN_NODES = 5;
 	public final static int MAX_CONNECT = 4;
 	public final static int MIN_EDGE_LEN = 1;
 	public final static int MAX_EDGE_LEN = 100;
@@ -58,67 +58,15 @@ public class Graph
 		edges.trimToSize();
 	}
 	
-	public void init()
-	{
-		Random rand = new Random();
-		
-		// Create initial node
-		double x = rand.nextDouble() * MAX_X;
-		double y = rand.nextDouble() * MAX_Y;
-		nodes.add(Node.newInstance(n_type, 0, x, y));
-		
-		// Add entry in edges for current node
-		for(int i = 0; i < nb_nodes; i++)
-		{
-			edges.add(new ArrayList<Edge>());
-		}
-		
-		// Build nodes as long as the max number of nodes hasn't been reached
-		for(int i = 0; nodes.size() < nb_nodes; i++)
-		{ 
-			// Try to create rand roads for each new node
-			addRoads(i);
-		}
-	}
+	public abstract void init();
 	
-	public void addRoads(int cur_node)
-	{
-		int n_roads = rand.nextInt(MAX_CONNECT) + 1;
-		Point cur_pos = nodes.get(cur_node).getPosition();
-		Tuple<Point, Edge> inter;
-		
-		for(int i = 1; i <= n_roads && nodes.size() < nb_nodes; i++)
-		{	
-			// Create new road randomly
-			double len = rand.nextDouble() * MAX_EDGE_LEN + MIN_EDGE_LEN;
-			double angle = rand.nextDouble() * Math.PI * 2;
-			double x = Math.max(0, Math.min((Math.cos(angle) * len) + cur_pos.getPosX(), MAX_X));
-			double y = Math.max(0, Math.min((Math.sin(angle) * len) + cur_pos.getPosY(), MAX_Y));
-			Point dest_pos = new Point(x, y);
-			int id = nodes.size();
-			
-			// Check if road intersects
-			inter = intersects(cur_pos, dest_pos);
-			
-			// If it does:
-			// - make the new road only reach the intersection point
-			// - cut intersected edge in half at the intersection point
-			if(inter != null)
-			{
-				dest_pos = inter.getFirst();
-				len = distance(cur_pos, dest_pos);
-				cut(inter.getSecond(), id, dest_pos);
-			}
-			
-			// Add new node and new road
-			nodes.add(Node.newInstance(n_type, id, x, y));
-			edges.get(cur_node).add(Edge.newInstance(e_type, len, cur_node, id));
-		}
-	}
+	public abstract void addRoads(int cur_node);
 	
 	public Tuple<Point, Edge> intersects(Point origin, Point dest)
 	{
-		Point res, o2, d2;
+		Point tmp, o2, d2;
+		Point inter_pt = null;
+		Edge inter_edge = null;
 		
 		// Check if road from 'origin' to 'dest' intersects any existing roads
 		for(var list : edges)
@@ -127,11 +75,21 @@ public class Graph
 				o2 = nodes.get(edge.getId1()).getPosition();
 				d2 = nodes.get(edge.getId2()).getPosition();
 				
-				res = Point.intersects(origin, dest, o2, d2);
+				tmp = Point.intersects(origin, dest, o2, d2);
 				
-				if(res != null)
-					return new Tuple<Point, Edge>(res, edge);
+				// Update intersection point if it's closer than last intersection found
+				if(tmp != null && (inter_pt == null || distance(tmp, origin) < distance(inter_pt, origin)))
+				{
+					inter_pt = tmp;
+					inter_edge = edge;
+				}	
 			}
+		
+		// Return intersection info if any was found
+		if(inter_pt != null)
+		{
+			return new Tuple<Point, Edge>(inter_pt, inter_edge);
+		}
 		
 		return null;
 	}
@@ -165,5 +123,78 @@ public class Graph
 	public ArrayList<ArrayList<Edge>> getEdges()
 	{
 		return edges;
+	}
+}
+
+class RandomGraph extends Graph
+{
+	public RandomGraph(int nb_nodes, NodeType n_type, EdgeType e_type)
+	{
+		super(nb_nodes, n_type, e_type);
+	}
+	
+	public RandomGraph(NodeType n_type, EdgeType e_type)
+	{
+		super(n_type, e_type);
+	}
+	
+	@Override
+	public void init()
+	{
+		Random rand = new Random();
+		
+		// Create initial node
+		double x = rand.nextDouble() * MAX_X;
+		double y = rand.nextDouble() * MAX_Y;
+		nodes.add(Node.newInstance(n_type, 0, x, y));
+		
+		// Add entry in edges for current node
+		for(int i = 0; i < nb_nodes; i++)
+		{
+			edges.add(new ArrayList<Edge>());
+		}
+		
+		// Build nodes as long as the max number of nodes hasn't been reached
+		for(int i = 0; nodes.size() < nb_nodes; i++)
+		{ 
+			// Try to create rand roads for each new node
+			addRoads(i);
+		}
+	}
+	
+	@Override
+	public void addRoads(int cur_node)
+	{
+		int n_roads = rand.nextInt(MAX_CONNECT) + 1;
+		Point cur_pos = nodes.get(cur_node).getPosition();
+		Tuple<Point, Edge> inter;
+		
+		for(int i = 1; i <= n_roads && nodes.size() < nb_nodes; i++)
+		{	
+			// Create new road randomly
+			double len = rand.nextDouble() * MAX_EDGE_LEN + MIN_EDGE_LEN;
+			double angle = rand.nextDouble() * Math.PI * 2;
+			double x = Math.max(0, Math.min((Math.cos(angle) * len) + cur_pos.getPosX(), MAX_X));
+			double y = Math.max(0, Math.min((Math.sin(angle) * len) + cur_pos.getPosY(), MAX_Y));
+			Point dest_pos = new Point(x, y);
+			int id = nodes.size();
+			
+			// Check if road intersects
+			inter = intersects(cur_pos, dest_pos);
+			
+			// If it does:
+			// - make the new road only reach the intersection point
+			// - cut intersected edge in half at the intersection point
+			if(inter != null)
+			{
+				dest_pos = inter.getFirst();
+				len = distance(cur_pos, dest_pos);
+				cut(inter.getSecond(), id, dest_pos);
+			}
+			
+			// Add new node and new road
+			nodes.add(Node.newInstance(n_type, id, x, y));
+			edges.get(cur_node).add(Edge.newInstance(e_type, len, cur_node, id));
+		}
 	}
 }

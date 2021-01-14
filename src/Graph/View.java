@@ -27,7 +27,7 @@ public class View
 	 */
 	public static void main(String[] args) 
 	{
-		Graph model = new Graph(NodeType.DEFAULT, EdgeType.DEFAULT);
+		Graph model = new RandomGraph(NodeType.DEFAULT, EdgeType.DEFAULT);
 		model.init();
 		
 		EventQueue.invokeLater( new Runnable() 
