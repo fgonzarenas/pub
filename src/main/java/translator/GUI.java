@@ -20,7 +20,7 @@ public class GUI
 		
 		try
 		{
-			graph.read("road-networks/LeHavre.dgs");
+			graph.read("road-networks/GraphTest.dgs");
 		} 
 		catch(Exception e) 
 		{
