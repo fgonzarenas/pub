@@ -1,39 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
    <dependencies>
-    <dependency>
+   
+  	<dependency>
       <groupId>org.graphstream</groupId>
       <artifactId>gs-core</artifactId>
       <version>2.0</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.graphstream</groupId>
+	  <artifactId>gs-ui-swing</artifactId>
+	  <version>2.0</version>
+	</dependency>
+	
   </dependencies>
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>pub</groupId>
   <artifactId>pub</artifactId>
   <version>0.0.1-SNAPSHOT</version> 
-  
-  <build>
-     <plugins>
-      <plugin>
-       <groupId>org.codehaus.mojo</groupId>
-       <artifactId>exec-maven-plugin</artifactId>
-       <version>1.1.1</version>
-       <executions>
-        <execution>
-         <phase>test</phase>
-         <goals>
-          <goal>java</goal>
-         </goals>
-         <configuration>
-          <mainClass>my.company.name.packageName.TestMain</mainClass>
-          <arguments>
-           <argument>myArg1</argument>
-           <argument>myArg2</argument>
-          </arguments>
-         </configuration>
-        </execution>
-       </executions>
-      </plugin>
-     </plugins>
-    </build>
 </project>

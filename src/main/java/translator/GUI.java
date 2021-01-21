@@ -7,16 +7,18 @@ public class GUI
 	public static void main(String args[]) 
 	{
 		System.setProperty("org.graphstream.ui", "swing");
-		
-		Graph graph = new SingleGraph("Tutorial 1");
-
-		graph.addNode("A");
-		graph.addNode("B");
-		graph.addNode("C");
-		graph.addEdge("AB", "A", "B");
-		graph.addEdge("BC", "B", "C");
-		graph.addEdge("CA", "C", "A");
-
-		graph.display();	
+		Graph graph = new MultiGraph("Le Havre");
+			
+		try
+		{
+			graph.read("road-networks/LeHavre.dgs");
+		} 
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
+			
+		graph.display(false);   // No auto-layout.
 	}
 }
