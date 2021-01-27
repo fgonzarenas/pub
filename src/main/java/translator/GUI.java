@@ -7,33 +7,38 @@ import org.graphstream.ui.view.Viewer;
 public class GUI 
 {
 	private Graph graph;
+	private String filename;
 	
 	public GUI(String file)
 	{
-		graph = new MultiGraph(file);
+		filename = "road-networks/" + file;
+		graph = new MultiGraph(filename);
 	}
 	
 	public void init()
 	{
 		System.setProperty("org.graphstream.ui", "swing");
 		
+		// Load graph
 		try
 		{
-			graph.read("road-networks/LeHavre.dgs");
+			graph.read(filename);
 		} 
 		catch(Exception e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
-			
-		init_stylesheet();
 		
+		// Display graph
+		init_stylesheet();
 		Viewer viewer = graph.display(false);   // No auto-layout.
-		/*ViewPanel view = (ViewPanel) viewer.getDefaultView(); // ViewPanel is the view for gs-ui-swing
-		//view.resizeFrame(800, 600);
-		view.getCamera().setViewCenter(3000, 8000, 0);
-		view.getCamera().setViewPercent(0.25);*/
+		
+		// Change edge colors (can be done dynamically)
+		graph.edges().forEach(edge -> {
+			float speedMax = ((float) edge.getNumber("speedMax")) / 130.0f;
+			edge.setAttribute("ui.color", speedMax);
+		});
 	}
 	
 	public void init_stylesheet()

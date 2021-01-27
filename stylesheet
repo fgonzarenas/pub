@@ -1,9 +1,5 @@
 node {
-	text-mode: hidden;
-}
-
-node {
-	size: 3px;
+	size: 1px;
 	fill-color: #777;
 	text-mode: hidden;
 	z-index: 0;
@@ -11,6 +7,10 @@ node {
 
 edge {
 	shape: line;
-	fill-color: #222;
-	arrow-size: 3px, 2px;
+	fill-mode: dyn-plain;
+	fill-color: #222, #555, green, yellow;
+	arrow-size: 0px, 0px;
+	stroke-color: yellow; 
+	stroke-width: 1px; 
+	stroke-mode: plain;
 }
