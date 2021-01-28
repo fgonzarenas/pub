@@ -20,30 +20,30 @@ an P x:21 y:4	ui.label:P
 an Q x:21 y:2	ui.label:Q
 an R x:18 y:2	ui.label:R
 
-ae AB A B
-ae AC A C
-ae AD A D
-ae BE B E
-ae BF B F
-ae CD C D
-ae CN C N
-ae DE D E
-ae DG D G
-ae EF E F
-ae EH E H
-ae FH F H
-ae GH G H
-ae GN G N
-ae HO H O
-ae IJ I J
-ae IL I L
-ae JK J K
-ae JL J L
-ae KM K M
-ae LM L M
-ae MO M O
-ae NL N L
-ae OP O P
-ae OR O R
-ae PQ P Q
-ae QR Q R
+ae AB A B	"length":2
+ae AC A C	"length":3
+ae AD A D	"length":2
+ae BE B E	"length":2
+ae BF B F	"length":3
+ae CD C D	"length":2
+ae CN C N	"length":3
+ae DE D E	"length":2
+ae DG D G	"length":3
+ae EF E F	"length":2
+ae EH E H	"length":3
+ae FH F H	"length":4
+ae GH G H	"length":2
+ae GN G N	"length":2
+ae HO H O	"length":12
+ae IJ I J	"length":3
+ae IL I L	"length":4
+ae JK J K	"length":4
+ae JL J L	"length":3
+ae KM K M	"length":3
+ae LM L M	"length":4
+ae MO M O	"length":6
+ae NL N L	"length":8
+ae OP O P	"length":3
+ae OR O R	"length":2
+ae PQ P Q	"length":2
+ae QR Q R	"length":3

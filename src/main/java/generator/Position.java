@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class Position {
 	private String node;
-	private Timestamp  timestamp;
+	private Timestamp timestamp;
 	
 	public Position(String n, Timestamp  t) {
 		timestamp = t;
