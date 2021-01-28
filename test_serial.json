@@ -1,0 +1,28 @@
+[
+  {
+    "agentId": 1,
+    "path": [
+      {
+        "node": "A",
+        "timestamp": "Jan 27, 2021, 10:25:15 PM"
+      },
+      {
+        "node": "B",
+        "timestamp": "Jan 27, 2021, 10:25:15 PM"
+      }
+    ]
+  },
+  {
+    "agentId": 2,
+    "path": [
+      {
+        "node": "C",
+        "timestamp": "Jan 27, 2021, 10:25:15 PM"
+      },
+      {
+        "node": "D",
+        "timestamp": "Jan 27, 2021, 10:25:15 PM"
+      }
+    ]
+  }
+]
