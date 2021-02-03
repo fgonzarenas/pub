@@ -9,13 +9,13 @@ import com.google.gson.GsonBuilder;
 
 public class Serializer {
 	private ArrayList<Agent> listAgent;
-	private int nbAgent;
+
 	private GsonBuilder builder;
 	private Gson gson;
 	private String filename;
+	private Generator generator;
 	
-	public Serializer(int nbA, String file) {
-		nbAgent = nbA;
+	public Serializer(String file) {
 		filename = file;
 		listAgent = new ArrayList<Agent>();
 		initGson();
@@ -26,24 +26,36 @@ public class Serializer {
 	    gson = builder.setPrettyPrinting().create();
 	}
 	
+	public void addGenerator(Generator g) {
+		generator = g;
+	}
+	
 	public void serialize() {
 		// generation of agent
-		Generator g = new Generator();
-		listAgent = g.generate(nbAgent);
+		listAgent = generator.generate();
 		
 		// serialization
 		try {
 			FileWriter file = new FileWriter(filename);
 			gson.toJson(listAgent, ArrayList.class, file);
 			file.close();
-			System.out.println("Successfully Copied JSON listAgent to File...");
+			System.out.println("Successfully Copied listAgent to JSON File...");
 	    } catch (final IOException e) {
 	    	e.printStackTrace();
 	    }	
 	}
 	
 	public static void main(final String[] args) {
-		Serializer s = new Serializer(10, "test_serial.json");
+		int startYear = 2021;
+		int startMonth = 0;
+		int startDay = 1;
+		int startHour = 6;
+		int endHour = 10;
+		
+		Generator g = new Generator(10, 3, startYear, startMonth, startDay, startHour, endHour);
+		
+		Serializer s = new Serializer("test_serial.json");
+		s.addGenerator(g);
 		s.serialize();
 	}
 }

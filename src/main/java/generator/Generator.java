@@ -3,7 +3,9 @@ package generator;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import org.graphstream.graph.*;
@@ -21,7 +23,17 @@ public class Generator {
 	private ArrayList<String> endNodes;
 	private int idCounter;
 	
-	public Generator() {
+	private int nbAgent;
+	private int nbPath;
+	
+	private int startYear;
+	private int startMonth;
+	private int startDay;
+	private int startHour;
+	private int endHour;
+	
+	
+	public Generator(int nbA, int nbP, int startY, int startM, int startD, int startH, int endH) {
 		view = new GUI("GraphTest.dgs");
 		view.init();
 		graph = view.getGraph();
@@ -29,6 +41,14 @@ public class Generator {
 		startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
 		endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
 		idCounter = 1;
+		
+		nbAgent = nbA;
+		nbPath = nbP;
+		startYear = startY;
+		startMonth = startM;
+		startDay = startD;
+		startHour = startH;
+		endHour = endH;
 	}
 	
 	// Shortest path between two nodes using Dijkstra
@@ -39,23 +59,11 @@ public class Generator {
  		dijkstra.compute();
  		
  		Path path = dijkstra.getPath(graph.getNode(n2));
- 		/*
- 		// Résultat du plus court chemin
- 		System.out.println("	path : " + path);
- 		System.out.println("	path length : " + dijkstra.getPathLength(graph.getNode(n2)));
- 		
- 		
- 		// Dessin du plus court chemin
- 		for (Edge edge : dijkstra.getPathEdges(graph.getNode(n2))) {
-			edge.setAttribute("ui.style", "fill-color: red;");
- 		}
- 		*/
  		
  		return path;
 	}
 	
 	public Agent createAgent() {
-		//System.out.println("Agent " + idCounter + " :");
 		Agent a = new Agent(idCounter);
 		idCounter++;
 		
@@ -64,17 +72,40 @@ public class Generator {
 		String start = startNodes.get(random.nextInt(startNodes.size()));
 		String end = endNodes.get(random.nextInt(endNodes.size()));
 		
-		// creation of the path
-		Path path = shortestPath(start,end);
-		for (Node n : path.getNodePath()) {
-			a.addPosition(new Position(n.getId(), new Timestamp(System.currentTimeMillis())));
-		}
+		// generation of starting date
+		int hour = random.nextInt(endHour-startHour+1) + startHour;
+		int min =  random.nextInt(60);
+		Calendar startCal = Calendar.getInstance();
+		startCal.set(startYear, startMonth, startDay, hour, min, 0);
+				
+		
+		for (int i=0; i<nbPath; i++) {
+			// creation of the path
+			Path path = shortestPath(start,end);
 			
+			// creation of the Calendar for this path
+			Calendar travelCalendar = (Calendar) startCal.clone();
+			travelCalendar.add(Calendar.DATE, i);
+			
+			GenPath p = new GenPath();
+			List<Node> nodeList = path.getNodePath();
+			List<Edge> edgeList = path.getEdgePath();
+			
+			p.addPosition(new Position(nodeList.get(0).getId(), new Timestamp(travelCalendar.getTimeInMillis())));
+			for (int j=0; j<edgeList.size(); j++) {
+				Integer travelTime = (Integer) edgeList.get(j).getAttribute("length");
+				travelCalendar.add(Calendar.MINUTE, travelTime);
+				p.addPosition(new Position(nodeList.get(j+1).getId(), new Timestamp(travelCalendar.getTimeInMillis())));
+			}
+			
+			a.addPath(p);
+		}
+		
 		return a;
 	}
 	
 	// generate a list of nbAgent Agent
-	public ArrayList<Agent> generate(int nbAgent) {
+	public ArrayList<Agent> generate() {
 		ArrayList<Agent> result = new ArrayList<Agent>();
 		
 		for (int i=0; i<nbAgent; i++)
@@ -82,6 +113,8 @@ public class Generator {
 		
 		return result;
 	}
+	
+	
 	
 	// Depth first for example but useless
 	public void exploreDepthFirst(String s) {
@@ -104,15 +137,17 @@ public class Generator {
         }
     }
     
-    public static void main(final String[] args) { 
-    	Generator g = new Generator();
-    	g.generate(5);
+    
+    
+    public static void main(final String[] args) {
+    	int startYear = 2021;
+		int startMonth = 0;
+		int startDay = 1;
+		int startHour = 6;
+		int endHour = 10;
+    	
+    	Generator g = new Generator(2, 1, startYear, startMonth, startDay, startHour, endHour);
+    	g.generate();
     	//g.exploreDepthFirst("A");
-    	//g.shortestPath("K","D");
-    	/*
-    	for (int i=0; i<5; i++) {
-    		g.createAgent();
-    	}
-    	*/
     }
 }

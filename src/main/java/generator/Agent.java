@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class Agent {
 	private Integer agentId;
 	private String description;
-	private ArrayList<Position> path;
+	private ArrayList<GenPath> pathList;
 	
 	public Agent(Integer id) {
 		agentId = id;
-		path = new ArrayList<Position>();
+		pathList = new ArrayList<GenPath>();
 	}
 	
 	public Integer getId() {
@@ -20,12 +20,12 @@ public class Agent {
 		return description;
 	}
 	
-	public ArrayList<Position> getPath() {
-		return path;
+	public ArrayList<GenPath> getPath() {
+		return pathList;
 	}
 	
-	public void addPosition(Position p) {
-		path.add(p);
+	public void addPath(GenPath p) {
+		pathList.add(p);
 	}
 	
 }
