@@ -20,7 +20,7 @@ an P x:21 y:4	ui.label:P
 an Q x:21 y:2	ui.label:Q
 an R x:18 y:2	ui.label:R
 
-ae AB A B	"length":2
+ae AB A B	"length":2	
 ae AC A C	"length":3
 ae AD A D	"length":2
 ae BE B E	"length":2

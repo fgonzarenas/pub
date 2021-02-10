@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.graphstream.graph.*;
-
+import org.graphstream.ui.view.Viewer;
 import org.graphstream.algorithm.*;
 import org.graphstream.algorithm.Dijkstra.Element;
+import java.util.Random;
 
 import translator.GUI;
 
@@ -147,7 +148,41 @@ public class Generator {
 		int endHour = 10;
     	
     	Generator g = new Generator(2, 1, startYear, startMonth, startDay, startHour, endHour);
-    	g.generate();
+
     	//g.exploreDepthFirst("A");
+    	
+    	// Set initial edge color
+    	g.graph.edges().forEach(edge -> {
+    		edge.setAttribute("ui.color", 0.f);
+    	});
+    	
+        ArrayList<Agent> listAgent = g.generate();
+        	
+        // Display paths
+        for(Agent agent : listAgent)
+        {	
+        	for(GenPath gp : agent.getPath())
+        	{	
+        		ArrayList<Position> path = gp.getPath();
+        		
+        		for(int i = 0; i < path.size() - 1; i++)
+        		{
+        			// Edge id is source node id concatenated to target node id
+        			String source = path.get(i).getNode();
+        			String target = path.get(i+1).getNode();
+        				
+        			Edge edge = g.graph.getEdge(source + target);
+        				
+        			// If edge not found, invert source and target id
+        			if(edge == null)
+        			{
+        				edge = g.graph.getEdge(target + source);
+        			}
+        			float passages = ((float) edge.getNumber("ui.color")) + 0.5f;
+        			System.out.println(passages);
+        			edge.setAttribute("ui.color", passages);
+        		}
+        	}
+        }    	
     }
 }

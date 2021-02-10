@@ -1,9 +1,12 @@
 package translator;
 
+import java.util.ArrayList;
+
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
 //import org.graphstream.ui.swing_viewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
+import generator.*;
 
 public class GUI 
 {
@@ -36,28 +39,16 @@ public class GUI
 			System.exit(1);
 		}
 		
-		// Display graph
 		init_stylesheet();
-		Viewer viewer = graph.display(false);   // No auto-layout.
-		
-		// Change edge colors (can be done dynamically)
-		graph.edges().forEach(edge -> {
-			float speedMax = ((float) edge.getNumber("speedMax")) / 130.0f;
-			edge.setAttribute("ui.color", speedMax);
-		});
+		graph.display(false);
 	}
 	
 	public void init_stylesheet()
 	{
 		graph.setAttribute("ui.quality");
 		graph.setAttribute("ui.antialias");
-		//graph.setAttribute("ui.stylesheet", "url('file://stylesheet')");
-		graph.setAttribute("ui.stylesheet", "node{stroke-mode:plain;stroke-color:black;fill-color:rgb(21,101,192);text-background-mode:rounded-box;text-padding:2;text-alignment:at-left;text-offset:-5;text-size:20;}node.marked{fill-color: red;}");
+		graph.setAttribute("ui.stylesheet", "url('file://stylesheet')");
+		//graph.setAttribute("ui.stylesheet", "node{stroke-mode:plain;stroke-color:black;fill-color:rgb(21,101,192);text-background-mode:rounded-box;text-padding:2;text-alignment:at-left;text-offset:-5;text-size:20;}node.marked{fill-color: red;}");
 	}
 	
-	public static void main(String args[]) 
-	{	
-		GUI view = new GUI("LeHavre.dgs");
-		view.init();
-	}
 }
