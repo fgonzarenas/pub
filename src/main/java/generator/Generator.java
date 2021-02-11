@@ -147,7 +147,7 @@ public class Generator {
 		int startHour = 6;
 		int endHour = 10;
     	
-    	Generator g = new Generator(2, 1, startYear, startMonth, startDay, startHour, endHour);
+    	Generator g = new Generator(10, 1, startYear, startMonth, startDay, startHour, endHour);
 
     	//g.exploreDepthFirst("A");
     	
@@ -158,7 +158,7 @@ public class Generator {
     	
         ArrayList<Agent> listAgent = g.generate();
         	
-        // Display paths
+        // Display paths     
         for(Agent agent : listAgent)
         {	
         	for(GenPath gp : agent.getPath())
@@ -178,11 +178,16 @@ public class Generator {
         			{
         				edge = g.graph.getEdge(target + source);
         			}
-        			float passages = ((float) edge.getNumber("ui.color")) + 0.5f;
-        			System.out.println(passages);
+        			
+        			float passages = ((float) edge.getNumber("ui.color")) + 1f;
+        			
         			edge.setAttribute("ui.color", passages);
         		}
         	}
-        }    	
+        }
+        
+        g.graph.edges().forEach(edge -> {
+        	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
+    	});
     }
 }

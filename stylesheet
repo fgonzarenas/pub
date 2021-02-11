@@ -17,6 +17,6 @@ node.marked {
 edge {
 	shape: line;
 	fill-mode: dyn-plain;
-	fill-color: black, green, red;
+	fill-color: black, green, yellow, orange, red, purple;
 	arrow-size: 0px, 0px;
 }
