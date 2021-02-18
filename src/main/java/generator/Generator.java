@@ -82,7 +82,14 @@ public class Generator {
 		
 		for (int i=0; i<nbPath; i++) {
 			// creation of the path
-			Path path = shortestPath(start,end);
+			Path path = null;
+			
+			// agent takes the same path often but sometimes goes to another destination
+			if(random.nextInt(10) < 7) {
+				path = shortestPath(start,end);
+			} else {
+				path = shortestPath(start, endNodes.get(random.nextInt(endNodes.size())));
+			}
 			
 			// creation of the Calendar for this path
 			Calendar travelCalendar = (Calendar) startCal.clone();
@@ -147,7 +154,7 @@ public class Generator {
 		int startHour = 6;
 		int endHour = 10;
     	
-    	Generator g = new Generator(10, 1, startYear, startMonth, startDay, startHour, endHour);
+    	Generator g = new Generator(5, 10, startYear, startMonth, startDay, startHour, endHour);
 
     	//g.exploreDepthFirst("A");
     	
@@ -189,5 +196,10 @@ public class Generator {
         g.graph.edges().forEach(edge -> {
         	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
     	});
+        
+        Serializer s = new Serializer("wtf.json");
+		s.addGenerator(g);
+		s.setListAgent(listAgent);
+		s.serialize();
     }
 }

@@ -30,10 +30,16 @@ public class Serializer {
 		generator = g;
 	}
 	
-	public void serialize() {
+	public void run() {
 		// generation of agent
 		listAgent = generator.generate();
-		
+	}
+	
+	public void setListAgent(ArrayList<Agent> list) {
+		listAgent = list;
+	}
+	
+	public void serialize() {
 		// serialization
 		try {
 			FileWriter file = new FileWriter(filename);
@@ -56,6 +62,7 @@ public class Serializer {
 		
 		Serializer s = new Serializer("test_serial.json");
 		s.addGenerator(g);
+		s.run();
 		s.serialize();
 	}
 }
