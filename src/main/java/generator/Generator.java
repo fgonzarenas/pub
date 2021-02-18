@@ -9,10 +9,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.graphstream.graph.*;
-import org.graphstream.ui.view.Viewer;
 import org.graphstream.algorithm.*;
 import org.graphstream.algorithm.Dijkstra.Element;
-import java.util.Random;
 
 import translator.GUI;
 
@@ -62,6 +60,11 @@ public class Generator {
  		Path path = dijkstra.getPath(graph.getNode(n2));
  		
  		return path;
+	}
+	
+	public Path pathWithVariation(String n1, String n2) {
+		// TODO
+		return null;
 	}
 	
 	public Agent createAgent() {
