@@ -88,17 +88,27 @@ public class Generator {
 			// creation of the path
 			Path path = null;
 			
-			// agent takes the same path often but sometimes goes to another destination
-			if(random.nextInt(10) < 7) {
-				path = shortestPath(start,end);
-			} else {
-				path = shortestPath(start, endNodes.get(random.nextInt(endNodes.size())));
-			}
-			
 			// creation of the Calendar for this path
 			Calendar travelCalendar = (Calendar) startCal.clone();
-			travelCalendar.add(Calendar.DATE, i);
-			travelCalendar.add(Calendar.MINUTE, random.nextInt(5));
+						
+			// agent takes the same path often but sometimes goes to another destination
+			if(random.nextInt(7) < 5) {
+				path = shortestPath(start,end);
+				travelCalendar.add(Calendar.MINUTE, random.nextInt(5));
+			} else {
+				/*
+				// agent does not travel sometimes
+				if(random.nextInt(3) < 1) {
+					continue;
+				}*/
+				
+				// go to random destination at random time
+				path = shortestPath(start, endNodes.get(random.nextInt(endNodes.size())));
+				travelCalendar.add(Calendar.HOUR, random.nextInt(12));
+				travelCalendar.add(Calendar.MINUTE, random.nextInt(60));
+			}
+			
+			travelCalendar.add(Calendar.DATE, i);			
 			travelCalendar.add(Calendar.SECOND, random.nextInt(60));
 			
 			GenPath p = new GenPath();
