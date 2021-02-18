@@ -79,8 +79,9 @@ public class Generator {
 		// generation of starting date
 		int hour = random.nextInt(endHour-startHour+1) + startHour;
 		int min =  random.nextInt(60);
+		int sec = random.nextInt(60);
 		Calendar startCal = Calendar.getInstance();
-		startCal.set(startYear, startMonth, startDay, hour, min, 0);
+		startCal.set(startYear, startMonth, startDay, hour, min, sec);
 				
 		
 		for (int i=0; i<nbPath; i++) {
@@ -97,6 +98,8 @@ public class Generator {
 			// creation of the Calendar for this path
 			Calendar travelCalendar = (Calendar) startCal.clone();
 			travelCalendar.add(Calendar.DATE, i);
+			travelCalendar.add(Calendar.MINUTE, random.nextInt(5));
+			travelCalendar.add(Calendar.SECOND, random.nextInt(60));
 			
 			GenPath p = new GenPath();
 			List<Node> nodeList = path.getNodePath();
@@ -106,6 +109,7 @@ public class Generator {
 			for (int j=0; j<edgeList.size(); j++) {
 				Integer travelTime = (Integer) edgeList.get(j).getAttribute("length");
 				travelCalendar.add(Calendar.MINUTE, travelTime);
+				travelCalendar.add(Calendar.SECOND, random.nextInt(60));
 				p.addPosition(new Position(nodeList.get(j+1).getId(), new Timestamp(travelCalendar.getTimeInMillis())));
 			}
 			
@@ -200,7 +204,7 @@ public class Generator {
         	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
     	});
         
-        Serializer s = new Serializer("wtf.json");
+        Serializer s = new Serializer("variance.json");
 		s.addGenerator(g);
 		s.setListAgent(listAgent);
 		s.serialize();
