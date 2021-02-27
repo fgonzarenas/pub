@@ -12,7 +12,10 @@ import org.graphstream.graph.Node;
 
 public class GraphAmas extends Amas<GraphEnvironment> {
 	
-	public Map<String, NodeAgent> agentMap;
+	private Map<String, NodeAgent> agentMap;
+	
+	private String startNode;
+	private String endNode;
 	
 	public GraphAmas(GraphEnvironment env) {
 		super(env, Scheduling.DEFAULT);
@@ -39,9 +42,21 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 			
 			// Adding the timetable to the agent
 			a.setTimetable(getEnvironment().getTimestampMap().get(n.getId()));
-		}
+		}	
+	}
+	
+	// Initialize the first NodeAgent of the search
+	public void initPathSearch(String start, String end) {
+		startNode = start;
+		endNode = end;
 		
-		
+		NodeAgent s = agentMap.get(start);
+		s.activate(null, s.getTimetable().get(0));
+		agentMap.get(end).setFinalNode();
+	}
+	
+	public Map<String, NodeAgent> getAgentMap() {
+		return agentMap;
 	}
 	
 }

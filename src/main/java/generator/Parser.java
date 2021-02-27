@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +51,11 @@ public class Parser {
 					}
 				}
 			}
+		}
+		
+		// Sorting lists of Timestamps
+		for (String node : resultMap.keySet()) {
+			Collections.sort(resultMap.get(node));
 		}
 		
 		return resultMap;

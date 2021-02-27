@@ -19,6 +19,9 @@ public class GraphEnvironment extends Environment {
 	private String graphFilename;
 	private String agentMoveFilename;
 	
+	// attribute use to count the number of cycle
+	private int cycleNumber;
+	
 	private Map<String, ArrayList<Timestamp>> timestampMap;
 	
 	public GraphEnvironment(String dgsFileName, String moveFilename) {
@@ -26,6 +29,7 @@ public class GraphEnvironment extends Environment {
 		graphFilename = "road-networks/" + dgsFileName;
 		graph = new MultiGraph(graphFilename);
 		agentMoveFilename = moveFilename;
+		cycleNumber = 0;
 		initGraph();
 	}
 	
@@ -44,6 +48,7 @@ public class GraphEnvironment extends Environment {
 		timestampMap = p.translate();
 	}
 	
+	
 	@Override
 	public void onInitialization() {
 		
@@ -51,9 +56,14 @@ public class GraphEnvironment extends Environment {
 	
 	@Override
 	public void onCycle() {
-		// TODO Auto-generated method stub
 		super.onCycle();
 		System.out.println("---------------------------------");
+	}
+	
+	
+	
+	public int getCycleNumber() {
+		return cycleNumber;
 	}
 	
 	public Graph getGraph() {
@@ -66,6 +76,7 @@ public class GraphEnvironment extends Environment {
 	
 	public static void main(String[] args) {
 		GraphEnvironment env = new GraphEnvironment("GraphTest.dgs", "test_serial.json");
-		new GraphAmas(env);
+		GraphAmas amas = new GraphAmas(env);
+		amas.initPathSearch("L", "B");
 	}
 }	
