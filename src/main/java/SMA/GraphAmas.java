@@ -1,7 +1,9 @@
 package SMA;
 
 import fr.irit.smac.amak.Amas;
+import fr.irit.smac.amak.Configuration;
 import fr.irit.smac.amak.Scheduling;
+import generator.Position;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,17 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 	
 	public GraphAmas(GraphEnvironment env) {
 		super(env, Scheduling.DEFAULT);
+	}
+	
+	
+	/*
+	 * Modification of the configuration to set the ExecutionPolicy to two phases to synchronize
+	 * agents one time after Perception phase and in a second time after Decide and Act phase
+	 */
+	@Override
+	protected void onInitialConfiguration() {
+		super.onInitialConfiguration();
+		Configuration.executionPolicy = ExecutionPolicy.TWO_PHASES;
 	}
 	
 	@Override
@@ -51,12 +64,20 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		endNode = end;
 		
 		NodeAgent s = agentMap.get(start);
-		s.activate(null, s.getTimetable().get(0));
+		s.activate(new Position(null, null), s.getTimetable().get(0));
 		agentMap.get(end).setFinalNode();
 	}
 	
 	public Map<String, NodeAgent> getAgentMap() {
 		return agentMap;
+	}
+	
+	public String getStartNode() {
+		return startNode;
+	}
+	
+	public String getEndNode() {
+		return endNode;
 	}
 	
 }

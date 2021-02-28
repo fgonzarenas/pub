@@ -29,7 +29,7 @@ public class GraphEnvironment extends Environment {
 		graphFilename = "road-networks/" + dgsFileName;
 		graph = new MultiGraph(graphFilename);
 		agentMoveFilename = moveFilename;
-		cycleNumber = 0;
+		cycleNumber = -1;
 		initGraph();
 	}
 	
@@ -57,9 +57,10 @@ public class GraphEnvironment extends Environment {
 	@Override
 	public void onCycle() {
 		super.onCycle();
+		cycleNumber++;
 		System.out.println("---------------------------------");
+		System.out.println("CycleNumber : " + cycleNumber);
 	}
-	
 	
 	
 	public int getCycleNumber() {
@@ -77,6 +78,6 @@ public class GraphEnvironment extends Environment {
 	public static void main(String[] args) {
 		GraphEnvironment env = new GraphEnvironment("GraphTest.dgs", "test_serial.json");
 		GraphAmas amas = new GraphAmas(env);
-		amas.initPathSearch("L", "B");
+		amas.initPathSearch("M", "B");
 	}
 }	

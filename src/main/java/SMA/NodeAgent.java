@@ -20,10 +20,10 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	
 	private Timestamp activeTimestamp;
 	// Regroup the information of the nodeAgent who has activate this nodeAgent and the date of passage on the precedent node
-	private Position precedentPosition;
+			//private ArrayList<Position> precedentPosition;
 	// Next position, null if the agent hasn't found a next position
-	private Position nextPosition; // MODIFIER EN ARRAYLIST
-	// Regroup the activation history on each cycle
+	private ArrayList<Position> nextPosition;
+	// Regroup the activation history on each cycle. The Position contains the node and the activeTimestamp of the agent who has activate this agent
 	private Map<Integer, ArrayList<Position>> activationHistory;
 	
 	
@@ -32,29 +32,42 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		nodeId = node;
 		timetable = new ArrayList<Timestamp>();
 		isActive = false;
+		nextPosition = new ArrayList<Position>();
 		activationHistory = new HashMap<Integer, ArrayList<Position>>();
 	}
 	
 	@Override
 	protected void onPerceive() {
 		super.onPerceive();
-		nextPosition = null;
+		nextPosition.clear();
 		if (isActive) {
 			
-			if (precedentPosition != null) 
-				System.out.println("[" + nodeId + "] activate : " + activeTimestamp + " | precedentPosition : " + precedentPosition.getNode());
+			/*
+			 *  TRACE D'AFFICHAGE
+			 */
+			if (activationHistory.containsKey(getEnvironment().getCycleNumber()-1)) {
+				int cycleNumberPrec = getEnvironment().getCycleNumber()-1;
+				System.out.print("[" + nodeId + "] activate : " + activeTimestamp + " | cycleNumberPrec : " + cycleNumberPrec + " | precedentPosition : ");
+				for (Position p : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+					System.out.print(p.getNode() + " ");
+				}
+				System.out.println();
+			}
 			else
 				System.out.println("[" + nodeId + "] activate : " + activeTimestamp);
+			/*
+			 *  FIN TRACE D'AFFICHAGE
+			 */
 			
 			for (Agent<GraphAmas, GraphEnvironment> neighboor : neighborhood) {
 				NodeAgent neighboorAgent = (NodeAgent) neighboor;
-				if (neighboorAgent.getTimetable() != null) {
+				if (neighboorAgent.getTimetable() != null && neighboorAgent.getNodeId() != nodeId) {
 					int i = 0;
 					boolean found = false;
 					while (!found && i<neighboorAgent.getTimetable().size()) {
 						if (neighboorAgent.getTimetable().get(i).compareTo(activeTimestamp) > 0) {
 							found = true;
-							nextPosition = new Position(neighboorAgent.getNodeId(), neighboorAgent.getTimetable().get(i));
+							nextPosition.add(new Position(neighboorAgent.getNodeId(), neighboorAgent.getTimetable().get(i)));
 						}
 						else {
 							i++;
@@ -70,20 +83,20 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	
 	@Override
 	protected void onDecide() {
-		// TODO Auto-generated method stub
 		super.onDecide();
 	}
 	
 	@Override
 	protected void onAct() {
 		super.onAct();
-		/*
-		if (timetable != null)
-			System.out.println("[" + nodeId + "] nombre de passage : " + timetable.size() + " timetable : " + timetable);
-		*/
 		if (isActive) {
-			NodeAgent nextAgent = getAmas().getAgentMap().get(nextPosition.getNode());
-			nextAgent.activate(new Position(nodeId, activeTimestamp), nextPosition.getTimestamp());
+			for (Position nextP : nextPosition) {
+				NodeAgent nextAgent = getAmas().getAgentMap().get(nextP.getNode());
+				nextAgent.activate(new Position(nodeId, activeTimestamp), nextP.getTimestamp());
+			}
+		}
+		if (activationHistory.containsKey(getEnvironment().getCycleNumber())) {
+			deactivate();
 		}
 	}
 	
@@ -101,13 +114,14 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	public void activate(Position precedentPos, Timestamp myTimestamp) {
 		isActive = true;
 		activeTimestamp = myTimestamp;
-		precedentPosition = precedentPos;
+		if (getEnvironment().getCycleNumber() != -1)
+			System.out.println("   ACTIVATE [" + nodeId + "] on cycle : " + getEnvironment().getCycleNumber() + " | by : " + precedentPos.getNode());
 		if (activationHistory.containsKey(getEnvironment().getCycleNumber())) {
-			activationHistory.get(getEnvironment().getCycleNumber()).add(precedentPosition);
+			activationHistory.get(getEnvironment().getCycleNumber()).add(precedentPos);
 		}
 		else {
 			ArrayList<Position> list = new ArrayList<Position>();
-			list.add(precedentPosition);
+			list.add(precedentPos);
 			activationHistory.put(getEnvironment().getCycleNumber(), list);
 		}
 	}
