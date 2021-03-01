@@ -64,7 +64,7 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		endNode = end;
 		
 		NodeAgent s = agentMap.get(start);
-		s.activate(new Position(null, null), s.getTimetable().get(0));
+		s.activate(new Position(null, null), new Position(s.getNodeId(), s.getTimetable().get(0)));
 		agentMap.get(end).setFinalNode();
 	}
 	

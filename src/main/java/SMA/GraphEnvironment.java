@@ -59,7 +59,7 @@ public class GraphEnvironment extends Environment {
 		super.onCycle();
 		cycleNumber++;
 		System.out.println("---------------------------------");
-		System.out.println("CycleNumber : " + cycleNumber);
+		System.out.println("Cycle : " + cycleNumber);
 	}
 	
 	
