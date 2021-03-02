@@ -18,19 +18,24 @@ public class GraphEnvironment extends Environment {
 	private Graph graph;
 	private String graphFilename;
 	private String agentMoveFilename;
+	private Map<String, ArrayList<Timestamp>> timestampMap;
 	
 	// attribute use to count the number of cycle
 	private int cycleNumber;
 	
-	private Map<String, ArrayList<Timestamp>> timestampMap;
+	// true if we want to display log
+	private boolean log;
 	
-	public GraphEnvironment(String dgsFileName, String moveFilename) {
+	
+	public GraphEnvironment(String dgsFileName, String moveFilename, boolean log) {
 		super(Scheduling.DEFAULT);
 		graphFilename = "road-networks/" + dgsFileName;
 		graph = new MultiGraph(graphFilename);
 		agentMoveFilename = moveFilename;
 		cycleNumber = -1;
 		initGraph();
+		
+		this.log = log;
 	}
 	
 	private void initGraph() {
@@ -75,9 +80,26 @@ public class GraphEnvironment extends Environment {
 		return timestampMap;
 	}
 	
+	public boolean hasLog() {
+		return log;
+	}
+	
+	
+	
 	public static void main(String[] args) {
-		GraphEnvironment env = new GraphEnvironment("GraphTest.dgs", "test_serial.json");
+		GraphEnvironment env = new GraphEnvironment("GraphTest.dgs", "test_serial.json", false);
 		GraphAmas amas = new GraphAmas(env);
-		amas.initPathSearch("M", "B");
+		
+		String start = "M";
+		String end = "B";
+		//long maxWaitingTime = 15*60000; // 15min in milliseconds
+		long maxWaitingTime = 120*60000;
+		amas.initPathSearch(start, end, maxWaitingTime);
+		
+		while (env.getCycleNumber() < env.getGraph().nodes().count())
+			amas.getScheduler().step();
+		
+		ArrayList<ArrayList<String>> pathList = amas.getPathList();
+		System.out.println("\nAcceptable path from " + start + " to " + end + " : " + pathList);
 	}
 }	

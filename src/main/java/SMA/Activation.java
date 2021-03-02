@@ -5,19 +5,22 @@ import java.util.ArrayList;
 import generator.Position;
 
 public class Activation {
-	private Position precedentPosition;
+	
+	/*
+	 * The historic of positions crossed since the first cycle of SMA
+	 */
+	private ArrayList<Position> precedentPositions;
+	/*
+	 * The current position
+	 */
 	private Position myPosition;
+	/*
+	 * The positions where the path can be extended
+	 */
 	private ArrayList<Position> nextPositions;
 	
-	public Activation() {
-		
-	}
-	
-	public void setPrecedentPosition(Position precPos) {
-		precedentPosition = precPos;
-	}
-	
-	public void setmyPosition(Position myPos) {
+	public Activation(ArrayList<Position> precPos, Position myPos) {
+		precedentPositions = precPos;
 		myPosition = myPos;
 	}
 	
@@ -31,8 +34,8 @@ public class Activation {
 		}
 	}
 	
-	public Position getPrecedentPosition() {
-		return precedentPosition;
+	public ArrayList<Position> getPrecedentPositions() {
+		return new ArrayList<Position>(precedentPositions);
 	}
 	
 	public Position getMyPosition() {

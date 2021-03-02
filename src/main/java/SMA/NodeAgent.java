@@ -10,6 +10,15 @@ import generator.Position;
 
 public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	
+	/*
+	 * On each cycle, a NodeAgent can be activated or disabled. If the agent is disabled 
+	 * it will do nothing. 
+	 * A NodeAgent "b" can be activated by another NodeAgents "a" if the NodeAgent "a" discovered 
+	 * that it could continue his path on node "b". A NodeAgent could be activated by several 
+	 * NodeAgents on the same cycle. If the agent is activated, it will look for a next node where 
+	 * it could extend the path and it will activate the associated NodeAgents
+	 */
+	
 	private String nodeId;
 	private ArrayList<Timestamp> timetable;
 		
@@ -17,7 +26,10 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	private boolean isFinalNode;
 	// True if the agent is active on this cycle (he has to search a next node on the path)
 	private boolean isActive;
-	// Regroup the activation history on each cycle. The Position contains the node and the activeTimestamp of the agent who has activate this agent
+	/* 
+	 * Regroup the activation history on each cycle. One activation contains the path traveled, the current 
+	 * node (here nodeId) and the neighboring nodes on which it is possible to continue this path
+	 */ 
 	private Map<Integer, ArrayList<Activation>> activationHistory;
 	
 	
@@ -29,43 +41,69 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		activationHistory = new HashMap<Integer, ArrayList<Activation>>();
 	}
 	
+	// Check if node is already in the path
+	private boolean notCrossedNode(ArrayList<Position> path, String node) {
+		for (Position p : path) {
+			if (p.getNode() == node)
+				return false;
+		}
+		return true;
+	}
+	
 	@Override
 	protected void onPerceive() {
 		super.onPerceive();
 		if (isActive && !isFinalNode ) {
 			
 			/*
-			 *  TRACE D'AFFICHAGE
+			 *  LOG
 			 */
-			if (activationHistory.containsKey(getEnvironment().getCycleNumber()-1)) {
-				int cycleNumberPrec = getEnvironment().getCycleNumber()-1;
-				System.out.print("[" + nodeId + "] activate | cycleNumberPrec : " + cycleNumberPrec + " | precedentPosition : ");
-				for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
-					System.out.print(a.getPrecedentPosition().getNode() + " " + a.getPrecedentPosition().getTimestamp());
+			if (getEnvironment().hasLog()) {
+				if (activationHistory.containsKey(getEnvironment().getCycleNumber()-1)) {
+					int cycleNumberPrec = getEnvironment().getCycleNumber()-1;
+					System.out.print("[" + nodeId + "] activate | cycleNumberPrec : " + cycleNumberPrec + " | precedentPosition : ");
+					for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+						if (getEnvironment().getCycleNumber() != 0)
+							System.out.print(a.getPrecedentPositions().get(a.getPrecedentPositions().size()-1).getNode() + " " 
+									+ a.getPrecedentPositions().get(a.getPrecedentPositions().size()-1).getTimestamp() + " ");
+					}
+					System.out.println();
 				}
-				System.out.println();
+				else
+					System.out.println("[" + nodeId + "] activate");
 			}
-			else
-				System.out.println("[" + nodeId + "] activate");
-			/*
-			 *  FIN TRACE D'AFFICHAGE
-			 */
 			
-			// Search if there is candidates to next nodes
+			
+			// Search if there is candidates to next nodes for each activation
 			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
 				Timestamp activeTimestamp = a.getMyPosition().getTimestamp();
 				
+				// Explore all neighboring NodeAgents
 				for (Agent<GraphAmas, GraphEnvironment> neighboor : neighborhood) {
 					NodeAgent neighboorAgent = (NodeAgent) neighboor;
 					
-					if (neighboorAgent.getTimetable() != null && neighboorAgent.getNodeId() != nodeId && neighboorAgent.getNodeId() != a.getPrecedentPosition().getNode()) {
+					if (neighboorAgent.getTimetable() != null 
+							// the next node is different of this node
+							&& neighboorAgent.getNodeId() != nodeId 
+							// the next node isn't already in the path
+							&& notCrossedNode(a.getPrecedentPositions(), neighboorAgent.getNodeId())) {
+						
 						int i = 0;
 						boolean found = false;
+						// Explore the timetable of the NodeAgent
 						while (!found && i<neighboorAgent.getTimetable().size()) {
-							if (neighboorAgent.getTimetable().get(i).compareTo(activeTimestamp) > 0) {
+							Timestamp ts = neighboorAgent.getTimetable().get(i);
+							/*
+							 * If a timestamp greater than the active timestamp of this agent is found and with a waiting 
+							 * period less than the waiting maximum, the following position is validated
+							 */
+							 
+							if (ts.compareTo(activeTimestamp) > 0 && (ts.getTime() - activeTimestamp.getTime()) <= getAmas().getMaxWaitingTime()) {
 								found = true;
 								a.setNextPosition(new Position(neighboorAgent.getNodeId(), neighboorAgent.getTimetable().get(i)));
-								System.out.println("   [" + nodeId + "] setNextPosition : " + neighboorAgent.getNodeId());
+								
+								if (getEnvironment().hasLog())
+									System.out.println("   [" + nodeId + "] setNextPosition : " + neighboorAgent.getNodeId());
 							}
 							else {
 								i++;
@@ -76,33 +114,22 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 				
 			}
 		}
-		// Recomposition of the path
+		// final node of the path research
 		else if (isActive && isFinalNode ) {
-			/*
+			if (getEnvironment().hasLog())
+				System.out.println("[" + nodeId + "] PATH FOUND !");
+			
 			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
-				int cycleNumber = getEnvironment().getCycleNumber()-1;
-				String currentNode = nodeId;
-				String previousNode = a.getPrecedentPosition().getNode();
-				ArrayList<String> path = new ArrayList<String>();
-				path.add(currentNode);
-				
-				while (previousNode != null) {
-					cycleNumber--;
-					// list of activations of the precedent node
-					ArrayList<Activation> activationList = getAmas().getAgentMap().get(previousNode).getActivationHistory().get(cycleNumber);
-					while 
-					
-					
-					currentNode = previousNode;
-					path.add(currentNode);
-					// previousNode = ... ;;;
+				System.out.print("   PATH : ");
+				for (Position p : a.getPrecedentPositions()) {
+					System.out.print(p.getNode() + " ");
 				}
-				
+				System.out.println(getNodeId());				
 			}
-			*/
 		}
 		else {
-			System.out.println("[" + nodeId + "] deactivate");
+			if (getEnvironment().hasLog())
+				System.out.println("[" + nodeId + "] disable");
 		}
 	}
 	
@@ -118,21 +145,31 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		 * Activation des noeuds suivants
 		 */
 		if (isActive && activationHistory.containsKey(getEnvironment().getCycleNumber()-1)) {
-
-			System.out.println("   [" + nodeId + "] act | taille activationHistory : " + activationHistory.get(getEnvironment().getCycleNumber()-1).size());
+			if (getEnvironment().hasLog())
+				System.out.println("   [" + nodeId + "] act | taille activationHistory : " 
+						+ activationHistory.get(getEnvironment().getCycleNumber()-1).size());
 			
 			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+				// Si un noeud suivant a été trouvé
 				if (a.hasNextPosition()) {
-					System.out.println("      [" + nodeId + "] act | taille nextPosition : " + a.getNextPositions().size());
+					if (getEnvironment().hasLog())
+						System.out.println("      [" + nodeId + "] act | taille nextPosition : " + a.getNextPositions().size());
+					
 					for (Position nextPos : a.getNextPositions()) {
+						// Recherche de l'agent suivant
 						NodeAgent nextAgent = getAmas().getAgentMap().get(nextPos.getNode());
-						nextAgent.activate(a.getMyPosition(), nextPos);
+						// Ajout de ce noeud au chemin
+						ArrayList<Position> path = a.getPrecedentPositions();
+						path.add(a.getMyPosition());
+						// Activation de l'agent suivant pour le prochain cycle
+						nextAgent.activate(path, nextPos);
 					}
 				}
 			}
 		}
+		// On desactive l'agent s'il n'a pas ete active sur ce cycle
 		if (!activationHistory.containsKey(getEnvironment().getCycleNumber())) {
-			deactivate();
+			disable();
 		}
 	}
 	
@@ -147,17 +184,22 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	}
 	
 	// Method to activate the agent for the next cycle, he will search a next position for the path
-	public void activate(Position precedentPos, Position myPosition) {
+	public void activate(ArrayList<Position> precedentPos, Position myPosition) {
 		isActive = true;
 		
-		if (getEnvironment().getCycleNumber() == -1)
-			System.out.println("   ACTIVATE [" + nodeId + "] on cycle : " + getEnvironment().getCycleNumber() + " | precedentPosition : " + precedentPos.getNode() + " | myPosition : " + myPosition.getNode() + " " + myPosition.getTimestamp());
-		else 
-			System.out.println("   ACTIVATE [" + nodeId + "] on cycle : " + getEnvironment().getCycleNumber() + " | by : " + precedentPos.getNode());
+		/*
+		 *  LOG
+		 */
+		if (getEnvironment().hasLog()) {
+			if (getEnvironment().getCycleNumber() == -1)
+				System.out.println("   ACTIVATE [" + nodeId + "] on cycle : " + getEnvironment().getCycleNumber());
+			else 
+				System.out.println("   ACTIVATE [" + nodeId + "] on cycle : " + getEnvironment().getCycleNumber() 
+						+ " | by : " + precedentPos.get(precedentPos.size()-1).getNode());
+		}
 		
-		Activation a = new Activation();
-		a.setPrecedentPosition(precedentPos);
-		a.setmyPosition(myPosition);
+		
+		Activation a = new Activation(precedentPos, myPosition);
 		
 		if (activationHistory.containsKey(getEnvironment().getCycleNumber())) {
 			activationHistory.get(getEnvironment().getCycleNumber()).add(a);
@@ -169,8 +211,8 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		}
 	}
 	
-	// method to deactivate the agent for the next cycle
-	public void deactivate() {
+	// method to disable the agent for the next cycle
+	public void disable() {
 		isActive = false;
 	}
 	

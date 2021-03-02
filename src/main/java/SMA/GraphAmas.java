@@ -5,6 +5,7 @@ import fr.irit.smac.amak.Configuration;
 import fr.irit.smac.amak.Scheduling;
 import generator.Position;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 	
 	private String startNode;
 	private String endNode;
+	private long maxWaitingTime;
 	
 	public GraphAmas(GraphEnvironment env) {
 		super(env, Scheduling.DEFAULT);
@@ -25,7 +27,7 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 	
 	
 	/*
-	 * Modification of the configuration to set the ExecutionPolicy to two phases to synchronize
+	 * Modification of the AMAS configuration to set the ExecutionPolicy to two phases to synchronize
 	 * agents one time after Perception phase and in a second time after Decide and Act phase
 	 */
 	@Override
@@ -58,14 +60,36 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		}	
 	}
 	
-	// Initialize the first NodeAgent of the search
-	public void initPathSearch(String start, String end) {
+	// Initialize the first and last NodeAgent of the research. maxWaitTime is in milliseconds
+	public void initPathSearch(String start, String end, long maxWaitTime) {
 		startNode = start;
 		endNode = end;
+		maxWaitingTime = maxWaitTime;
 		
 		NodeAgent s = agentMap.get(start);
-		s.activate(new Position(null, null), new Position(s.getNodeId(), s.getTimetable().get(0)));
+		s.activate(new ArrayList<Position>(), new Position(s.getNodeId(), s.getTimetable().get(0)));
 		agentMap.get(end).setFinalNode();
+	}
+	
+	// Return the list of path found by the research
+	public ArrayList<ArrayList<String>> getPathList() {
+		ArrayList<ArrayList<String>> pathList = new ArrayList<ArrayList<String>>();
+		Map<Integer, ArrayList<Activation>> hist = agentMap.get(endNode).getActivationHistory();
+		
+		for (int i=0; i<getEnvironment().getCycleNumber(); i++) {
+			if (hist.containsKey(i)) {
+				for (Activation a : hist.get(i)) {
+					ArrayList<String> path = new ArrayList<String>();
+					for (Position p : a.getPrecedentPositions())
+						path.add(p.getNode());
+					path.add(endNode);
+					pathList.add(path);
+				}
+			}
+		}
+		
+		return pathList;
+		
 	}
 	
 	public Map<String, NodeAgent> getAgentMap() {
@@ -78,6 +102,9 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 	
 	public String getEndNode() {
 		return endNode;
+	}
+	public long getMaxWaitingTime() {
+		return maxWaitingTime;
 	}
 	
 }
