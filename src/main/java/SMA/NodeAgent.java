@@ -2,10 +2,12 @@ package SMA;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import fr.irit.smac.amak.Agent;
+import generator.PosEdge;
 import generator.Position;
 
 public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
@@ -19,9 +21,10 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	 * it could extend the path and it will activate the associated NodeAgents
 	 */
 	
+	// The node of the graph associated to this agent
 	private String nodeId;
-	private ArrayList<Timestamp> timetable;
-		
+	// The keys are the adjacent nodes and the values are the position edges between this node and the adjacent node
+	private Map<String, ArrayList<PosEdge>> edgeTimetable;
 	// True if this agent correspond to the final node of the path search
 	private boolean isFinalNode;
 	// True if the agent is active on this cycle (he has to search a next node on the path)
@@ -36,23 +39,33 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	public NodeAgent(GraphAmas amas, String node) {
 		super(amas);
 		nodeId = node;
-		timetable = new ArrayList<Timestamp>();
+		edgeTimetable = new HashMap<String, ArrayList<PosEdge>>();
 		isActive = false;
 		activationHistory = new HashMap<Integer, ArrayList<Activation>>();
 	}
 	
-	// Check if node is already in the path
-	private boolean notCrossedNode(ArrayList<Position> path, String node) {
-		for (Position p : path) {
-			if (p.getNode() == node)
-				return false;
+	// Checks if the node does not appear more times in the path than the maximum number of times it can be crossed
+	private boolean multipleCrossedNode(ArrayList<Position> path, String node) {
+		int occurence = Collections.frequency(path, node);
+		if (occurence > getEnvironment().getMaxCrossedNode())
+			return false;
+		else
+			return true;
+	}
+	
+	// USED IN LOG
+	private void printPrecedentPath(Activation a) {
+		//System.out.print("   [" + nodeId + "] precedent path : ");
+		for (Position pos : a.getPrecedentPositions()) {
+			System.out.print(pos.getNode() + " ");
 		}
-		return true;
+		System.out.println(a.getMyPosition().getNode());
 	}
 	
 	@Override
 	protected void onPerceive() {
 		super.onPerceive();
+		
 		if (isActive && !isFinalNode ) {
 			
 			/*
@@ -75,50 +88,48 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 			
 			
 			// Search if there is candidates to next nodes for each activation
-			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
-				Timestamp activeTimestamp = a.getMyPosition().getTimestamp();
-				
-				// Explore all neighboring NodeAgents
-				for (Agent<GraphAmas, GraphEnvironment> neighboor : neighborhood) {
-					NodeAgent neighboorAgent = (NodeAgent) neighboor;
+			if (activationHistory.containsKey(getEnvironment().getCycleNumber()-1)) {
+				for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+					Timestamp activeTimestamp = a.getMyPosition().getTimestamp();
 					
-					if (neighboorAgent.getTimetable() != null 
-							// the next node is different of this node
-							&& neighboorAgent.getNodeId() != nodeId 
-							// the next node isn't already in the path
-							&& notCrossedNode(a.getPrecedentPositions(), neighboorAgent.getNodeId())) {
-						
-						int i = 0;
-						boolean found = false;
-						// Explore the timetable of the NodeAgent
-						while (!found && i<neighboorAgent.getTimetable().size()) {
-							Timestamp ts = neighboorAgent.getTimetable().get(i);
-							/*
-							 * If a timestamp greater than the active timestamp of this agent is found and with a waiting 
-							 * period less than the waiting maximum, the following position is validated
-							 */
-							 
-							if (ts.compareTo(activeTimestamp) > 0 && (ts.getTime() - activeTimestamp.getTime()) <= getAmas().getMaxWaitingTime()) {
-								found = true;
-								a.setNextPosition(new Position(neighboorAgent.getNodeId(), neighboorAgent.getTimetable().get(i)));
-								
-								if (getEnvironment().hasLog())
-									System.out.println("   [" + nodeId + "] setNextPosition : " + neighboorAgent.getNodeId());
-							}
-							else {
-								i++;
+					if (getEnvironment().hasLog())
+						printPrecedentPath(a);
+					
+					// Explore all neighboring NodeAgents
+					if (edgeTimetable != null && edgeTimetable.keySet().size() != 0) {
+						for (String neighbor : edgeTimetable.keySet()) {
+							if (multipleCrossedNode(a.getPrecedentPositions(), neighbor)) {
+								// list of edges from this node agent to neighbor
+								ArrayList<PosEdge> edgeList = edgeTimetable.get(neighbor);
+								int i = 0;
+								boolean found = false;
+								// Explore the timetable of the NodeAgent
+								while (!found && i<edgeList.size()) {
+									Timestamp ts = edgeList.get(i).getNextPos().getTimestamp();
+									// If a timestamp greater than the active timestamp of this agent is found and with a waiting 
+									// period less than the waiting maximum, the following position is validated
+									if (ts.compareTo(activeTimestamp) > 0 && (ts.getTime() - activeTimestamp.getTime()) <= getAmas().getMaxWaitingTime()) {
+										found = true;
+										a.setNextPosition(new Position(neighbor, ts));
+										
+										if (getEnvironment().hasLog())
+											System.out.println("   [" + nodeId + "] setNextPosition : " + neighbor + " | timestamp : " + ts);
+									}
+									else {
+										i++;
+									}
+								}
 							}
 						}
 					}
 				}
-				
 			}
 		}
 		// final node of the path research
 		else if (isActive && isFinalNode ) {
 			if (getEnvironment().hasLog())
 				System.out.println("[" + nodeId + "] PATH FOUND !");
-			
+			/*
 			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
 				System.out.print("   PATH : ");
 				for (Position p : a.getPrecedentPositions()) {
@@ -126,6 +137,7 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 				}
 				System.out.println(getNodeId());				
 			}
+			*/
 		}
 		else {
 			if (getEnvironment().hasLog())
@@ -174,15 +186,6 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 	}
 	
 	
-	
-	public void setTimetable(ArrayList<Timestamp> timestampList) {
-		timetable = timestampList;
-	}
-	
-	public void setFinalNode() {
-		isFinalNode = true;
-	}
-	
 	// Method to activate the agent for the next cycle, he will search a next position for the path
 	public void activate(ArrayList<Position> precedentPos, Position myPosition) {
 		isActive = true;
@@ -211,17 +214,49 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		}
 	}
 	
+	// Return the list of path found by the research
+	public ArrayList<ArrayList<Position>> getPathList() {
+		ArrayList<ArrayList<Position>> pathList = new ArrayList<ArrayList<Position>>();
+		if (isFinalNode) {
+			Map<Integer, ArrayList<Activation>> hist = new HashMap<Integer, ArrayList<Activation>>(activationHistory);
+			for (int i : hist.keySet()) {
+				for (Activation a : hist.get(i)) {
+					ArrayList<Position> path = new ArrayList<Position>();
+					for (Position p : a.getPrecedentPositions())
+						path.add(p);
+					path.add(a.getMyPosition());
+					pathList.add(path);
+				}
+			}
+		}
+		
+		return pathList;
+	}
+	
 	// method to disable the agent for the next cycle
 	public void disable() {
 		isActive = false;
 	}
 	
+	public void setEdgeTimetable(Map<String, ArrayList<PosEdge>> edgeMap) {
+		edgeTimetable = edgeMap;
+	}
+	
+	public void setIsFinalNode(boolean b) {
+		isFinalNode = b;
+	}
+	
+	public void clearActivationHistory() {
+		activationHistory.clear();
+	}
+	
+	
 	public String getNodeId() {
 		return nodeId;
 	}
 	
-	public ArrayList<Timestamp> getTimetable() {
-		return timetable;
+	public Map<String, ArrayList<PosEdge>> getEdgeTimetable() {
+		return edgeTimetable;
 	}
 	
 	public Map<Integer, ArrayList<Activation>> getActivationHistory() {

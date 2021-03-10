@@ -58,7 +58,7 @@ public class Serializer {
 		int startHour = 6;
 		int endHour = 10;
 		
-		Generator g = new Generator(50, 3, startYear, startMonth, startDay, startHour, endHour);
+		Generator g = new Generator(300, 1, startYear, startMonth, startDay, startHour, endHour);
 		
 		Serializer s = new Serializer("test_serial.json");
 		s.addGenerator(g);

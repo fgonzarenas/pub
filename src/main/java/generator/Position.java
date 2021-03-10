@@ -18,4 +18,8 @@ public class Position {
 	public Timestamp getTimestamp() {
 		return timestamp;
 	}
+	
+	public String toString() {
+		return "(" + node + "," + timestamp.toString() + ")";
+	}
 }

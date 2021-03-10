@@ -3,6 +3,7 @@ package SMA;
 import fr.irit.smac.amak.Amas;
 import fr.irit.smac.amak.Configuration;
 import fr.irit.smac.amak.Scheduling;
+import generator.PosEdge;
 import generator.Position;
 
 import java.util.ArrayList;
@@ -56,41 +57,146 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 			}
 			
 			// Adding the timetable to the agent
-			a.setTimetable(getEnvironment().getTimestampMap().get(n.getId()));
+			a.setEdgeTimetable(getEnvironment().getEdgeMap().get(n.getId()));
 		}	
 	}
 	
-	// Initialize the first and last NodeAgent of the research. maxWaitTime is in milliseconds
-	public void initPathSearch(String start, String end, long maxWaitTime) {
-		startNode = start;
-		endNode = end;
-		maxWaitingTime = maxWaitTime;
+	private void clearAllActivationHistory() {
 		
-		NodeAgent s = agentMap.get(start);
-		s.activate(new ArrayList<Position>(), new Position(s.getNodeId(), s.getTimetable().get(0)));
-		agentMap.get(end).setFinalNode();
+		for (NodeAgent a : agentMap.values()) {
+			a.clearActivationHistory();
+		}
+		
+		/*
+		ArrayList<Thread> threadList = new ArrayList<Thread>();
+		
+		for (NodeAgent a : agentMap.values()) {
+			Thread t = new Thread(new Runnable() {
+				public void run() {
+					a.clearActivationHistory();
+					a.disable();
+				}
+			});
+			threadList.add(t);
+		}
+		
+		for (Thread t : threadList) {
+			try {
+				t.join();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		*/
+		
 	}
 	
-	// Return the list of path found by the research
-	public ArrayList<ArrayList<String>> getPathList() {
-		ArrayList<ArrayList<String>> pathList = new ArrayList<ArrayList<String>>();
-		Map<Integer, ArrayList<Activation>> hist = agentMap.get(endNode).getActivationHistory();
+	
+	
+	public void setMaxWaitingTime(long maximumWaitingTime) {
+		maxWaitingTime = maximumWaitingTime;
+	}
+	
+	
+	// Initialize the first and last NodeAgent of the research
+	public void initOnePathSearch(Position startPosition, String end) {
+		startNode = startPosition.getNode();
+		endNode = end;
 		
-		for (int i=0; i<getEnvironment().getCycleNumber(); i++) {
-			if (hist.containsKey(i)) {
-				for (Activation a : hist.get(i)) {
-					ArrayList<String> path = new ArrayList<String>();
-					for (Position p : a.getPrecedentPositions())
-						path.add(p.getNode());
-					path.add(endNode);
-					pathList.add(path);
+		NodeAgent s = agentMap.get(startNode);
+		s.activate(new ArrayList<Position>(), startPosition);
+		agentMap.get(endNode).setIsFinalNode(true);
+	}
+	
+	// Finds all the paths between two nodes for all the starting positions of the starting node
+	public ArrayList<ArrayList<Position>> searchAllPath(String start, String end) {
+		startNode = start;
+		endNode = end;
+		NodeAgent s = agentMap.get(start);
+		NodeAgent e = agentMap.get(end);
+		
+		ArrayList<ArrayList<Position>> resultPath = new ArrayList<ArrayList<Position>>();
+		
+		// Get all start positions of the start node
+		ArrayList<Position> startPositions = new ArrayList<Position>();
+		for (ArrayList<PosEdge> list : s.getEdgeTimetable().values()) {
+			for (PosEdge edge : list)
+				startPositions.add(edge.getFirstPos());
+		}
+		
+		for (Position startPos : startPositions) {
+			// System.out.println("START POSITION : " + startPos);
+
+			clearAllActivationHistory();
+			
+			/*
+			 * SYNCHRONISATION A FAIRE
+			 */
+			
+			try {
+				Thread.sleep(5);
+			} catch (final InterruptedException ex) {
+				ex.printStackTrace();
+			}
+			
+			/*
+			 * SYNCHRONISATION A FAIRE
+			 */
+			
+			initOnePathSearch(startPos, end);
+			int startCycleNumber = getEnvironment().getCycleNumber();
+			while (getEnvironment().getCycleNumber() < startCycleNumber + getEnvironment().getGraph().nodes().count())
+				getScheduler().step();
+			
+			ArrayList<ArrayList<Position>> pathList = e.getPathList();
+			//System.out.println("\nAcceptable path from " + start + " to " + end + " : " + pathList);
+			
+			getAgentMap().get(end).setIsFinalNode(false);
+			
+			resultPath.addAll(pathList);
+		}
+	
+		
+		return resultPath;
+	}
+	
+	public ArrayList<ArrayList<Position>> graphExplore() {
+		ArrayList<ArrayList<Position>> resultPath = new ArrayList<ArrayList<Position>>();
+		
+		ArrayList<String> nodeIdList = new ArrayList<String>();
+		for (Node n : getEnvironment().getGraph()) {
+			nodeIdList.add(n.getId());
+		}
+		
+		System.out.println("nodeIdList : " + nodeIdList);
+		
+		// list for test ...
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("P"); list.add("Q"); list.add("R"); list.add("B"); 
+		
+		for (String start : nodeIdList) {
+			NodeAgent s = agentMap.get(start);			
+			for (String end : nodeIdList) {
+				if (start.compareTo(end) != 0 && s.getEdgeTimetable() != null) {
+					System.out.println("Start : " + start + " | End : " + end);
+					
+					ArrayList<ArrayList<Position>> pathSearch = searchAllPath(start, end);
+					resultPath.addAll(pathSearch);
 				}
 			}
 		}
-		
-		return pathList;
-		
+			
+		return resultPath;
 	}
+	
+	public String printList(ArrayList<ArrayList<Position>> list) {
+		String res = "";
+		for (ArrayList<Position> l : list) {
+			res += l + ",\n";
+		}
+		return res;
+	}
+
 	
 	public Map<String, NodeAgent> getAgentMap() {
 		return agentMap;
