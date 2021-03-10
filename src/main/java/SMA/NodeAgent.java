@@ -138,7 +138,14 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 					System.out.println(getNodeId());				
 				}
 			}
-			
+			// Add all paths found to the amas path list
+			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+				ArrayList<Position> path = new ArrayList<Position>();
+				for (Position p : a.getPrecedentPositions())
+					path.add(p);
+				path.add(a.getMyPosition());
+				getAmas().addPath(path);
+			}
 		}
 		else {
 			if (getEnvironment().hasLog())

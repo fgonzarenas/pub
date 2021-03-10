@@ -121,8 +121,8 @@ public class GraphEnvironment extends Environment {
 		*/
 		
 		/*
-		ArrayList<ArrayList<Position>> resultPath = amas.searchAllPath(start, end);
-		System.out.println("Chemins entre " + start + " et " + end + " : " + resultPath.size());
+		amas.searchAllPath(start, end);
+		System.out.println("Chemins entre " + start + " et " + end + " : " + amas.getPathList().size());
 		//System.out.println(amas.printList(resultPath));
 		*/
 		
@@ -130,7 +130,6 @@ public class GraphEnvironment extends Environment {
 		ArrayList<ArrayList<Position>> resultPath = amas.graphExplore();
 		System.out.println("(graph exploration) path found : " + resultPath.size() + " | cycle number : " + env.getCycleNumber());
 		//System.out.println(amas.printList(resultPath));
-		
 		
 	}
 }	
