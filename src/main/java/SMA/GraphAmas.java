@@ -61,37 +61,6 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		}	
 	}
 	
-	private void clearAllActivationHistory() {
-		
-		for (NodeAgent a : agentMap.values()) {
-			a.clearActivationHistory();
-		}
-		
-		/*
-		ArrayList<Thread> threadList = new ArrayList<Thread>();
-		
-		for (NodeAgent a : agentMap.values()) {
-			Thread t = new Thread(new Runnable() {
-				public void run() {
-					a.clearActivationHistory();
-					a.disable();
-				}
-			});
-			threadList.add(t);
-		}
-		
-		for (Thread t : threadList) {
-			try {
-				t.join();
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		*/
-		
-	}
-	
-	
 	
 	public void setMaxWaitingTime(long maximumWaitingTime) {
 		maxWaitingTime = maximumWaitingTime;
@@ -125,37 +94,29 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		}
 		
 		for (Position startPos : startPositions) {
-			// System.out.println("START POSITION : " + startPos);
-
-			clearAllActivationHistory();
+			//initOnePathSearch(startPos, end);
+			startNode = startPos.getNode();
+			endNode = end;
 			
-			/*
-			 * SYNCHRONISATION A FAIRE
-			 */
+			NodeAgent sa = agentMap.get(startNode);
+			sa.activate(new ArrayList<Position>(), startPos);
+			agentMap.get(endNode).setIsFinalNode(true);
 			
-			try {
-				Thread.sleep(5);
-			} catch (final InterruptedException ex) {
-				ex.printStackTrace();
-			}
-			
-			/*
-			 * SYNCHRONISATION A FAIRE
-			 */
-			
-			initOnePathSearch(startPos, end);
 			int startCycleNumber = getEnvironment().getCycleNumber();
+			// we carry out a cycle number equal to the number of nodes because a path will never be longer than the number of nodes
 			while (getEnvironment().getCycleNumber() < startCycleNumber + getEnvironment().getGraph().nodes().count())
 				getScheduler().step();
 			
 			ArrayList<ArrayList<Position>> pathList = e.getPathList();
-			//System.out.println("\nAcceptable path from " + start + " to " + end + " : " + pathList);
-			
-			getAgentMap().get(end).setIsFinalNode(false);
-			
 			resultPath.addAll(pathList);
+			
+			for (NodeAgent a : agentMap.values()) {
+				a.clearActivationHistory();
+				a.disable();
+			}
+			e.setIsFinalNode(false);
 		}
-	
+		System.out.println("   between " + start + " and " + end + " : " + resultPath.size());
 		
 		return resultPath;
 	}
@@ -167,13 +128,11 @@ public class GraphAmas extends Amas<GraphEnvironment> {
 		for (Node n : getEnvironment().getGraph()) {
 			nodeIdList.add(n.getId());
 		}
-		
-		System.out.println("nodeIdList : " + nodeIdList);
-		
+		/*
 		// list for test ...
 		ArrayList<String> list = new ArrayList<String>();
-		list.add("P"); list.add("Q"); list.add("R"); list.add("B"); 
-		
+		list.add("P"); list.add("M"); list.add("Q"); list.add("R"); list.add("B"); 
+		*/
 		for (String start : nodeIdList) {
 			NodeAgent s = agentMap.get(start);			
 			for (String end : nodeIdList) {

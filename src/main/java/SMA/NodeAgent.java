@@ -127,17 +127,18 @@ public class NodeAgent extends Agent<GraphAmas, GraphEnvironment> {
 		}
 		// final node of the path research
 		else if (isActive && isFinalNode ) {
-			if (getEnvironment().hasLog())
+			if (getEnvironment().hasLog()) {
 				System.out.println("[" + nodeId + "] PATH FOUND !");
-			/*
-			for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
-				System.out.print("   PATH : ");
-				for (Position p : a.getPrecedentPositions()) {
-					System.out.print(p.getNode() + " ");
+
+				for (Activation a : activationHistory.get(getEnvironment().getCycleNumber()-1)) {
+					System.out.print("   PATH : ");
+					for (Position p : a.getPrecedentPositions()) {
+						System.out.print(p.getNode() + " ");
+					}
+					System.out.println(getNodeId());				
 				}
-				System.out.println(getNodeId());				
 			}
-			*/
+			
 		}
 		else {
 			if (getEnvironment().hasLog())
