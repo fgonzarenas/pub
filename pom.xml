@@ -38,10 +38,23 @@
   	</dependency>
 	
 	<dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-cuda-10.0</artifactId>
-    <version>1.0.0-beta7</version>
+	    <groupId>org.deeplearning4j</groupId>
+	    <artifactId>deeplearning4j-cuda-10.0</artifactId>
+	    <version>1.0.0-beta7</version>
 	</dependency>
+	
+	<dependency>
+	    <groupId>com.opencsv</groupId>
+	    <artifactId>opencsv</artifactId>
+	    <version>4.0</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>org.javatuples</groupId>
+	    <artifactId>javatuples</artifactId>
+	    <version>1.2</version>
+	</dependency>
+	
   </dependencies>
   
   <modelVersion>4.0.0</modelVersion>

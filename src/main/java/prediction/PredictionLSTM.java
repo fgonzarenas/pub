@@ -25,16 +25,68 @@ import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.recurrent.Bidirectional;
 import org.nd4j.linalg.api.ops.impl.layers.recurrent.config.LSTMConfiguration;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;  
+import com.opencsv.CSVReader;
+
+import java.util.ArrayList;
 
 public class PredictionLSTM 
 {
-	public void build()
+	ArrayList<ArrayList<Integer>> train;
+	ArrayList<ArrayList<Integer>> test;
+	MultiLayerNetwork net;
+	
+	public PredictionLSTM(String filename)
+	{
+		
+	}
+	
+	public void init(String filename)
+	{
+		read(filename);
+		build();
+	}
+	
+	public void read(String filename)
+	{
+		ArrayList<ArrayList<Integer>> samples = new ArrayList<ArrayList<Integer>>();
+		ArrayList<Integer> cur_sample;
+		
+		try
+		{
+			CSVReader reader = new CSVReader(new FileReader(filename));
+			String nextLine[];
+			
+			while((nextLine = reader.readNext()) != null)
+			{
+				cur_sample = new ArrayList<Integer>();
+				
+				for(String token : nextLine)
+				{
+					cur_sample.add(Integer.parseInt(token));
+				}
+				
+				samples.add(cur_sample);
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		int n = samples.size();
+		int test_n = (int) (n * 0.8);
+
+		test = new ArrayList<ArrayList<Integer>>(samples.subList(0, test_n));
+		train = new ArrayList<ArrayList<Integer>>(samples.subList(test_n, n));
+	}
+	
+	public MultiLayerNetwork build()
 	{
 		var LSTM_IN = 80;
 		var LSTM_OUT = 128;
+		var OUT = 10;
 		
 		var conf = new NeuralNetConfiguration.Builder()
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -53,13 +105,19 @@ public class PredictionLSTM
 	                    .build())
 	                .build()
 	             )
-	             .layer(1, new DenseLayer.Builder()
-	                		.activation(Activation.SOFTSIGN)
-	                		.build())
+	             .layer(1, new RnnOutputLayer.Builder(LossFunction.MSE)
+	            		 .activation(Activation.IDENTITY)
+	                     .nIn(LSTM_OUT)
+	                     .nOut(OUT)
+	                     .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+	                     .gradientNormalizationThreshold(10)
+	                     .build())
 	             .build();
 			
 	    var net = new MultiLayerNetwork(conf);
 		net.init();
+		
+		return net;
 			
 		// Train model on training set
 		//net.fit(train , 25);
@@ -70,4 +128,10 @@ public class PredictionLSTM
 
 		//System.out.println(eval.stats());
 	}
+	
+	public void run()
+	{
+		
+	}
+	
 }
