@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.io.FileWriter;
 import java.sql.Timestamp;
 
 import org.graphstream.graph.*;
@@ -33,12 +34,15 @@ public class Generator {
 	
 	
 	public Generator(int nbA, int nbP, int startY, int startM, int startD, int startH, int endH) {
-		view = new GUI("GraphTest.dgs");
+		//view = new GUI("GraphTest.dgs");
+		view = new GUI("1lane.dgs");
 		view.init();
 		graph = view.getGraph();
 		
-		startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
-		endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
+		//startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
+		//endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
+		startNodes = new ArrayList<String>(Arrays.asList("A"));
+		endNodes = new ArrayList<String>(Arrays.asList("B"));
 		idCounter = 1;
 		
 		nbAgent = nbA;
@@ -261,6 +265,20 @@ public class Generator {
     	return csv;
     }
     
+    public void writeCSV(ArrayList<Agent> listAgent, String filename)
+    {
+    	int[][] traffic = asTraffic(listAgent, 15);
+        String csv = trafficAsCSV(traffic, 15);
+        
+    	try {
+    	      FileWriter writer = new FileWriter(filename);
+    	      writer.write(csv);
+    	      writer.close();
+    	      System.out.println("Successfully wrote csv file...");
+    	    } catch (Exception e) {
+    	      e.printStackTrace();
+    	    }
+    }
     
     
     public static void main(final String[] args) {
@@ -270,7 +288,7 @@ public class Generator {
 		int startHour = 6;
 		int endHour = 10;
     	
-    	Generator g = new Generator(100, 3, startYear, startMonth, startDay, startHour, endHour);
+    	Generator g = new Generator(100, 10, startYear, startMonth, startDay, startHour, endHour);
 
     	//g.exploreDepthFirst("A");
     	
@@ -280,11 +298,11 @@ public class Generator {
     	});
     	
         ArrayList<Agent> listAgent = g.generate();
+        g.writeCSV(listAgent, "traffic_data_1lane.csv");
         
-        int[][] traffic = g.asTraffic(listAgent, 15);
-        System.out.println(g.trafficAsCSV(traffic, 15));
         	
-        // Display paths     
+        // Display paths
+        /*
         for(Agent agent : listAgent)
         {	
         	for(GenPath gp : agent.getPath())
@@ -315,10 +333,13 @@ public class Generator {
         g.graph.edges().forEach(edge -> {
         	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
     	});
+    	*/
         
+        /*
         Serializer s = new Serializer("variance2.json");
 		s.addGenerator(g);
 		s.setListAgent(listAgent);
 		s.serialize();
+		*/
     }
 }

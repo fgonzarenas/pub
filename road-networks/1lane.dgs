@@ -1,0 +1,7 @@
+DGS004
+Graph 0 0
+
+an A x:2 y:2	ui.label:A
+an B x:102 y:2	ui.label:B
+
+ae AB A B	"length":100	
