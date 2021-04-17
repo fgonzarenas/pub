@@ -29,12 +29,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;  
 import com.opencsv.CSVReader;
 
+import org.datavec.api.records.reader.impl.csv.CSVSequenceRecordReader;
+import org.datavec.api.records.reader.SequenceRecordReader;
+import org.datavec.api.split.InputSplit;
+
 import java.util.ArrayList;
 
 public class PredictionLSTM 
 {
-	ArrayList<ArrayList<Integer>> train;
-	ArrayList<ArrayList<Integer>> test;
+	SequenceRecordReaderDataSetIterator train;
+	SequenceRecordReaderDataSetIterator test;
 	MultiLayerNetwork net;
 	
 	public PredictionLSTM(String filename)
@@ -50,6 +54,7 @@ public class PredictionLSTM
 	
 	public void read(String filename)
 	{
+		/*
 		ArrayList<ArrayList<Integer>> samples = new ArrayList<ArrayList<Integer>>();
 		ArrayList<Integer> cur_sample;
 		
@@ -74,12 +79,9 @@ public class PredictionLSTM
 		{
 			e.printStackTrace();
 		}
+		*/
 		
-		int n = samples.size();
-		int test_n = (int) (n * 0.8);
-
-		test = new ArrayList<ArrayList<Integer>>(samples.subList(0, test_n));
-		train = new ArrayList<ArrayList<Integer>>(samples.subList(test_n, n));
+		
 	}
 	
 	public MultiLayerNetwork build()
@@ -118,20 +120,18 @@ public class PredictionLSTM
 		net.init();
 		
 		return net;
-			
-		// Train model on training set
-		//net.fit(train , 25);
-			
-		//var eval = net.evaluateRegression[RegressionEvaluation](test);
-
-		//test.reset();
-
-		//System.out.println(eval.stats());
 	}
 	
 	public void run()
 	{
-		
+		// Train model on training set
+		net.fit(train , 25);
+					
+		// var eval = net.evaluateRegression[RegressionEvaluation](test);
+
+		test.reset();
+
+		// System.out.println(eval.stats());
 	}
 	
 }
