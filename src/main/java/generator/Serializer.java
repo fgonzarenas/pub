@@ -50,19 +50,4 @@ public class Serializer {
 	    	e.printStackTrace();
 	    }	
 	}
-	
-	public static void main(final String[] args) {
-		int startYear = 2021;
-		int startMonth = 0;
-		int startDay = 1;
-		int startHour = 6;
-		int endHour = 10;
-		
-		Generator g = new Generator(300, 1, startYear, startMonth, startDay, startHour, endHour);
-		
-		Serializer s = new Serializer("test_serial.json");
-		s.addGenerator(g);
-		s.run();
-		s.serialize();
-	}
 }

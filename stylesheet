@@ -5,8 +5,8 @@ node {
 	text-background-mode:rounded-box;
 	text-padding:2;
 	text-alignment:at-left;
-	text-offset:-5;
-	text-size:20;
+	text-offset:-10, 15;
+	text-size:30;
 	
 }
 
@@ -18,5 +18,5 @@ edge {
 	shape: line;
 	fill-mode: dyn-plain;
 	fill-color: black, green, yellow, orange, red;
-	arrow-size: 0px, 0px;
+	arrow-size: 5px, 5px;
 }

@@ -15,7 +15,7 @@ public class GUI
 	
 	public GUI(String file)
 	{
-		filename = "road-networks/" + file;
+		filename = file;
 		graph = new MultiGraph(filename);
 	}
 	
@@ -50,5 +50,4 @@ public class GUI
 		graph.setAttribute("ui.stylesheet", "url('file://stylesheet')");
 		//graph.setAttribute("ui.stylesheet", "node{stroke-mode:plain;stroke-color:black;fill-color:rgb(21,101,192);text-background-mode:rounded-box;text-padding:2;text-alignment:at-left;text-offset:-5;text-size:20;}node.marked{fill-color: red;}");
 	}
-	
 }

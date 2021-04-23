@@ -1,0 +1,77 @@
+DGS004
+Graph 0 0
+
+an A x:2 y:8	ui.label:A
+an B x:2 y:6	ui.label:B
+an C x:4 y:10	ui.label:C
+an D x:4 y:8	ui.label:D
+an E x:4 y:6	ui.label:E
+an F x:4 y:4	ui.label:F
+an G x:7 y:8	ui.label:G
+an H x:7 y:6	ui.label:H
+an I x:11 y:13	ui.label:I
+an J x:14 y:13	ui.label:J
+an K x:18 y:13	ui.label:K
+an L x:14 y:10	ui.label:L
+an M x:18 y:10	ui.label:M
+an N x:7 y:10	ui.label:N
+an O x:18 y:4	ui.label:O
+an P x:21 y:4	ui.label:P
+an Q x:21 y:2	ui.label:Q
+an R x:18 y:2	ui.label:R
+
+ae AB A > B	"length":2	
+ae AC A > C	"length":3
+ae AD A > D	"length":2
+ae BE B > E	"length":2
+ae BF B > F	"length":3
+ae CD C > D	"length":2
+ae CN C > N	"length":3
+ae DE D > E	"length":2
+ae DG D > G	"length":3
+ae EF E > F	"length":2
+ae EH E > H	"length":3
+ae FH F > H	"length":4
+ae GH G > H	"length":2
+ae GN G > N	"length":2
+ae HO H > O	"length":12
+ae IJ I > J	"length":3
+ae IL I > L	"length":4
+ae JK J > K	"length":4
+ae JL J > L	"length":3
+ae KM K > M	"length":3
+ae LM L > M	"length":4
+ae MO M > O	"length":6
+ae NL N > L	"length":8
+ae OP O > P	"length":3
+ae OR O > R	"length":2
+ae PQ P > Q	"length":2
+ae QR Q > R	"length":3
+
+ae BA A < B	"length":2	
+ae CA A < C	"length":3
+ae DA A < D	"length":2
+ae EB B < E	"length":2
+ae FB B < F	"length":3
+ae DC C < D	"length":2
+ae NC C < N	"length":3
+ae ED D < E	"length":2
+ae GD D < G	"length":3
+ae FE E < F	"length":2
+ae HE E < H	"length":3
+ae HF F < H	"length":4
+ae HG G < H	"length":2
+ae NG G < N	"length":2
+ae OH H < O	"length":12
+ae JI I < J	"length":3
+ae LI I < L	"length":4
+ae KJ J < K	"length":4
+ae LJ J < L	"length":3
+ae MK K < M	"length":3
+ae ML L < M	"length":4
+ae OM M < O	"length":6
+ae LN N < L	"length":8
+ae PO O < P	"length":3
+ae RO O < R	"length":2
+ae QP P < Q	"length":2
+ae RQ Q < R	"length":3

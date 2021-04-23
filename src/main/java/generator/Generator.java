@@ -33,16 +33,14 @@ public class Generator {
 	private int endHour;
 	
 	
-	public Generator(int nbA, int nbP, int startY, int startM, int startD, int startH, int endH) {
+	public Generator(String graph_filename, int nbA, int nbP, int startY, int startM, int startD, int startH, int endH) {
 		//view = new GUI("GraphTest.dgs");
-		view = new GUI("1lane.dgs");
+		view = new GUI(graph_filename);
 		view.init();
 		graph = view.getGraph();
 		
-		//startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
-		//endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
-		startNodes = new ArrayList<String>(Arrays.asList("A"));
-		endNodes = new ArrayList<String>(Arrays.asList("B"));
+		startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
+		endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
 		idCounter = 1;
 		
 		nbAgent = nbA;
@@ -148,24 +146,10 @@ public class Generator {
 		return result;
 	}
 	
-	
-	
-	// Depth first for example but useless
-	public void exploreDepthFirst(String s) {
-		Node source = graph.getNode(s);
-        Iterator<? extends Node> k = source.getDepthFirstIterator();
-
-        while (k.hasNext()) {
-            Node next = k.next();
-            next.setAttribute("ui.style", "fill-color: red;");
-            sleep();
-        }
-    }
-	
 	// function to slow down the display
-    protected void sleep() {
+    protected void sleep(int millis) {
         try { 
-        	Thread.sleep(1000); 
+        	Thread.sleep(millis); 
         } catch (Exception e) {
         	e.printStackTrace();
         }
@@ -240,6 +224,7 @@ public class Generator {
     }
     
     
+    // Get traffic across entire network ever 'step' minutes as a csv string 
     public String trafficAsCSV(int[][] traffic, int step)
     {
     	String csv = "";
@@ -265,10 +250,10 @@ public class Generator {
     	return csv;
     }
     
-    public void writeCSV(ArrayList<Agent> listAgent, String filename)
+    // Write traffic across entire network ever 'step' minutes to a csv file 
+    public void writeCSV(int[][] traffic, int step, String filename)
     {
-    	int[][] traffic = asTraffic(listAgent, 15);
-        String csv = trafficAsCSV(traffic, 15);
+        String csv = trafficAsCSV(traffic, step);
         
     	try {
     	      FileWriter writer = new FileWriter(filename);
@@ -280,17 +265,57 @@ public class Generator {
     	    }
     }
     
+    // Display traffic across all recorded timestamps 
+	public void displayAllTraffic(int[][] traffic)
+	{
+        // Accumulate passages
+        for(int i = 0; i < traffic.length; i++)
+        {
+        	for(int i_edge = 0; i_edge < traffic[i].length; i_edge++)
+        	{
+        		Edge edge = graph.getEdge(i_edge);
+        		
+        		float passages = ((float) edge.getNumber("ui.color")) + traffic[i][i_edge];
+    			
+    			edge.setAttribute("ui.color", passages);
+        	}
+        }
+        
+        // Normalize
+        graph.edges().forEach(edge -> {
+        	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (nbAgent * nbPath));
+    	});
+	}
+	
+	// Display traffic on a specific timestamp 
+		public void displayTraffic(int[][] traffic, int i)
+		{
+			// Normalize according to this (somewhat arbitrary)
+			float div = (float) Math.log(nbAgent);
+
+	        // Set number of passages and normalize
+			for(int i_edge = 0; i_edge < traffic[i].length; i_edge++)
+	        {
+	        	Edge edge = graph.getEdge(i_edge);
+	        	
+	        	float passages = traffic[i][i_edge] / div;
+	    			
+	    		edge.setAttribute("ui.color", passages);
+	        }
+		}
+	
+    
     
     public static void main(final String[] args) {
     	int startYear = 2021;
 		int startMonth = 0;
 		int startDay = 1;
-		int startHour = 6;
-		int endHour = 10;
+		int startHour = 0;
+		int endHour = 23;
+		String filename = "road-networks/GraphTest_oriented.dgs";
+		int step = 15;
     	
-    	Generator g = new Generator(100, 10, startYear, startMonth, startDay, startHour, endHour);
-
-    	//g.exploreDepthFirst("A");
+    	Generator g = new Generator(filename, 100, 1, startYear, startMonth, startDay, startHour, endHour);
     	
     	// Set initial edge color
     	g.graph.edges().forEach(edge -> {
@@ -298,48 +323,14 @@ public class Generator {
     	});
     	
         ArrayList<Agent> listAgent = g.generate();
-        g.writeCSV(listAgent, "traffic_data_1lane.csv");
+        int[][] traffic = g.asTraffic(listAgent, step);
         
-        	
         // Display paths
-        /*
-        for(Agent agent : listAgent)
-        {	
-        	for(GenPath gp : agent.getPath())
-        	{	
-        		ArrayList<Position> path = gp.getPath();
-        		
-        		for(int i = 0; i < path.size() - 1; i++)
-        		{
-        			// Edge id is source node id concatenated to target node id
-        			String source = path.get(i).getNode();
-        			String target = path.get(i+1).getNode();
-        				
-        			Edge edge = g.graph.getEdge(source + target);
-        				
-        			// If edge not found, invert source and target id
-        			if(edge == null)
-        			{
-        				edge = g.graph.getEdge(target + source);
-        			}
-        			
-        			float passages = ((float) edge.getNumber("ui.color")) + 1f;
-        			
-        			edge.setAttribute("ui.color", passages);
-        		}
-        	}
+        for(int i = 0; i < traffic.length; i++)
+        {
+        	g.displayTraffic(traffic, i);
+        	g.sleep(1000);
         }
-        
-        g.graph.edges().forEach(edge -> {
-        	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
-    	});
-    	*/
-        
-        /*
-        Serializer s = new Serializer("variance2.json");
-		s.addGenerator(g);
-		s.setListAgent(listAgent);
-		s.serialize();
-		*/
+
     }
 }

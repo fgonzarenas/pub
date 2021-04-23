@@ -58,7 +58,7 @@ public class PredictionLSTM
 		ArrayList<ArrayList<Integer>> samples = new ArrayList<ArrayList<Integer>>();
 		ArrayList<Integer> cur_sample;
 		
-		try
+		try   
 		{
 			CSVReader reader = new CSVReader(new FileReader(filename));
 			String nextLine[];
