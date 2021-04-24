@@ -15,8 +15,7 @@ def create_dataset(X, y, time_steps=1):
 
 	return np.array(Xs), np.array(ys)
 
-
-filename = 'data/traffic_data.csv'
+filename = 'data/traffic_data_oriented.csv'
 
 # Parse data
 data = pd.read_csv(filename, parse_dates=[0], index_col=0)
@@ -38,7 +37,7 @@ train.loc[:, f_columns] = f_transformer.transform(train[f_columns].to_numpy())
 test.loc[:, f_columns] = f_transformer.transform(test[f_columns].to_numpy())
 
 # Scale down traffic
-t_columns = [str(i) if i == 0 else '0.' + str(i) for i in range(data.shape[1] - len(f_columns))]
+t_columns = [str(i) for i in range(data.shape[1] - len(f_columns))]
 t_transformer = RobustScaler().fit(train[t_columns].to_numpy())
 
 train[t_columns] = t_transformer.transform(train[t_columns].to_numpy())
@@ -62,7 +61,8 @@ model.add(
 
 model.add(keras.layers.Dropout(rate=0.2))
 model.add(keras.layers.Dense(units=len(t_columns)))
-model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+model.add(keras.layers.ReLU())
+model.compile(loss='mean_squared_error', optimizer='adam')
 
 history = model.fit(
 	X_train, y_train,
@@ -75,17 +75,21 @@ history = model.fit(
 # Plot prediction outcome
 prediction = model.predict(X_test)
 prediction = t_transformer.inverse_transform(prediction)
+prediction = np.round(prediction)
+prediction = prediction.astype(int)
 
-for i in range(len(t_columns)):
+"""
+for i in range(1):
 	plt.figure()
-	plt.plot(y_test[:,i], label='Real')
-	plt.plot(prediction[:,i], label='Prediction')
+	plt.plot(y_test[:,22], label='Real')
+	plt.plot(prediction[:,22], label='Prediction')
 	plt.title('Traffic prediction')
 	plt.xlabel('Time step')
 	plt.ylabel('Traffic')
 	plt.legend()
-	plt.savefig('results/edge'+str(i)+'.png')
-	plt.close()
+	plt.show()
+	#plt.savefig('results/edge'+str(i)+'.png')
+	#plt.close()
 
 # Plot loss by epoch
 plt.figure()
@@ -97,12 +101,26 @@ plt.ylabel('Loss')
 plt.legend()
 plt.show()
 plt.close()
-
+"""
 
 # Save model
+"""
 #model.save('model/traffic_model')
 model.save_weights('model/traffic_model_weights')
 json_string = model.to_json()
 model_file = open('model/traffic_model_json', 'w')
 model_file.write(json_string)
 model_file.close()
+"""
+
+# Save predictions
+timestamps = test.index[time_steps:]
+columns = [i for i in range(prediction.shape[1])]
+
+prediction = pd.DataFrame(prediction, index=timestamps, columns=columns)
+real = pd.DataFrame(y_test.astype(int), index=timestamps, columns=columns)
+prediction.index.name = 'timestamp'
+real.index.name = 'timestamp'
+
+prediction.to_csv('prediction.csv')
+real.to_csv('real.csv')

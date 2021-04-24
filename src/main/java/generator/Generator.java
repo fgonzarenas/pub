@@ -3,13 +3,13 @@ package generator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.io.FileWriter;
 import java.sql.Timestamp;
 
 import org.graphstream.graph.*;
+
 import org.graphstream.algorithm.*;
 import org.graphstream.algorithm.Dijkstra.Element;
 
@@ -224,45 +224,66 @@ public class Generator {
     }
     
     
-    // Get traffic across entire network ever 'step' minutes as a csv string 
-    public String trafficAsCSV(int[][] traffic, int step)
+    // Get traffic across entire network every 'step' minutes as a csv string 
+    public String[] trafficAsCSV(int[][] traffic, int step)
     {
-    	String csv = "";
+    	String[] csv = new String[traffic.length];
     	Calendar timestamp = Calendar.getInstance();
     	timestamp.setTimeInMillis(0);
     	timestamp.set(startYear, startMonth, startDay, 0, 0, 0);
     	int features = traffic[0].length;
+
     	
     	for(int i = 0; i < traffic.length; i++)
     	{  		
-    		csv += new Timestamp(timestamp.getTimeInMillis()) + ",";
+    		csv[i] = new Timestamp(timestamp.getTimeInMillis()) + ",";
     				
     		for(int j = 0; j < features-1; j++)
     		{
-    			csv += traffic[i][j] + ",";
+    			csv[i] += traffic[i][j] + ",";
     		}
     		
-    		csv += traffic[i][features-1] + "\n";
+    		csv[i] += traffic[i][features-1] + "\n";
     		
     		timestamp.add(Calendar.MINUTE, step); 
     	}
-    	
+
     	return csv;
     }
     
     // Write traffic across entire network ever 'step' minutes to a csv file 
     public void writeCSV(int[][] traffic, int step, String filename)
     {
-        String csv = trafficAsCSV(traffic, step);
+        String[] csv = trafficAsCSV(traffic, step);
+        int features = traffic[0].length;
+  
+		String header = "timestamp,";
+		
+    	for(int i = 0; i < features-1; i++)
+    	{
+    		header += Integer.toString(i) + ",";
+    	}
+    	
+    	header += Integer.toString(features-1) + "\n";
         
-    	try {
-    	      FileWriter writer = new FileWriter(filename);
-    	      writer.write(csv);
-    	      writer.close();
-    	      System.out.println("Successfully wrote csv file...");
-    	    } catch (Exception e) {
-    	      e.printStackTrace();
-    	    }
+    	try 
+    	{
+    		FileWriter fileWriter = new FileWriter(filename);
+    		
+    		fileWriter.write(header);
+			fileWriter.flush();
+			
+    		for(int i = 0; i < csv.length; i++)
+    		{
+    			fileWriter.write(csv[i]);
+    			fileWriter.flush();
+    		}
+
+			fileWriter.close();
+			System.out.println("Successfully wrote csv file...");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
     
     // Display traffic across all recorded timestamps 
@@ -310,12 +331,12 @@ public class Generator {
     	int startYear = 2021;
 		int startMonth = 0;
 		int startDay = 1;
-		int startHour = 0;
-		int endHour = 23;
+		int startHour = 6;
+		int endHour = 10;
 		String filename = "road-networks/GraphTest_oriented.dgs";
 		int step = 15;
     	
-    	Generator g = new Generator(filename, 100, 1, startYear, startMonth, startDay, startHour, endHour);
+    	Generator g = new Generator(filename, 100, 100, startYear, startMonth, startDay, startHour, endHour);
     	
     	// Set initial edge color
     	g.graph.edges().forEach(edge -> {
@@ -324,13 +345,16 @@ public class Generator {
     	
         ArrayList<Agent> listAgent = g.generate();
         int[][] traffic = g.asTraffic(listAgent, step);
+        g.writeCSV(traffic, step, "traffic_data_oriented.csv");
         
         // Display paths
+        /*
         for(int i = 0; i < traffic.length; i++)
         {
         	g.displayTraffic(traffic, i);
         	g.sleep(1000);
         }
+        */
 
     }
 }
