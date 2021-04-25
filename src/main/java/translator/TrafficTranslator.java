@@ -200,4 +200,34 @@ public class TrafficTranslator
     	
     	return null;
     }
+    
+    // Get all timestamps
+    public static String[] getTimestamps(String filename)
+    {    	
+    	try 
+    	{
+    		CSVReader reader = new CSVReader(new FileReader(filename));
+    		
+    		// Skip header
+    		String[] nextLine = reader.readNext();
+    		
+    		int timesteps = (int) Files.lines(Paths.get(filename)).count() - 1;
+    		String[] timestamps = new String[timesteps];
+    		int timestep = 0;
+    		
+    		while((nextLine = reader.readNext()) != null)
+    		{
+    			timestamps[timestep] = nextLine[0];		
+    			timestep++; 
+    		}
+
+			reader.close();
+			return timestamps;
+			
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    	return null;
+    }
 }

@@ -175,33 +175,51 @@ public class Generator {
 		int startDay = 1;
 		int startHour = 0;
 		int endHour = 10;
-		String filename = "road-networks/GraphTest_oriented.dgs";
+
 		int step = 15;
 		int nbAgents = 100;
 		int nbPaths = 1;
+		
+		String filename = "road-networks/GraphTest_oriented.dgs";
     	
     	Generator g = new Generator(filename, nbAgents, nbPaths, startYear, startMonth, startDay, startHour, endHour);
     	Graph graph = g.getGraph();
     	int[] config = g.getConfig();
     	
-    	GUI view = new GUI(filename, graph);
+    	GUI view = new GUI(filename);
+    	GUI view2 = new GUI(filename);
     	TrafficTranslator tt = new TrafficTranslator(graph, config);
     	
     	view.init();
+    	view2.init();
     	
+    	/*
         ArrayList<Agent> listAgent = g.generate();
         int[][] traffic = tt.pathsAsTraffic(listAgent, step);
-        // g.writeCSV(traffic, step, "traffic_data_oriented.csv");
-        
-        view.displayAllTraffic(traffic, nbPaths * nbAgents);
-        // Display paths
-        /*
-        for(int i = 0; i < traffic.length; i++)
-        {
-        	view.displayTraffic(traffic, i, (float) Math.log(nbAgents));
-        	view.sleep(1000);
-        }
         */
+    	
+        // g.writeCSV(traffic, step, "traffic_data_oriented.csv");
+    	
+    	// Load prediction data
+		String pred_file = "python/prediction.csv";
+		String real_file = "python/real.csv";
+    	int[][] pred_traffic = TrafficTranslator.csvToArray(pred_file);
+    	int[][] real_traffic = TrafficTranslator.csvToArray(real_file);
+    	
+    	String[] timestamps = TrafficTranslator.getTimestamps(pred_file); 	
+    	double[] error = GUI.getMSE(pred_traffic, real_traffic);
+    	
+    	int start = 10;
+    	
+        // Display paths
+        for(int i = start; i < pred_traffic.length; i++)
+        {
+        	System.out.println("Error at " + timestamps[i] + ": " + error[i]);
+        	view.displayTraffic(pred_traffic, i, (float) Math.log(nbAgents));
+        	view2.displayTraffic(real_traffic, i, (float) Math.log(nbAgents));
+        	view.sleep(1000);
+        	view2.sleep(1000);
+        }
 
     }
 }

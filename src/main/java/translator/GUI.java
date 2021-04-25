@@ -2,6 +2,7 @@ package translator;
 
 import java.util.ArrayList;
 
+import org.graphstream.algorithm.measure.ChartSeries1DMeasure;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
 //import org.graphstream.ui.swing_viewer.ViewPanel;
@@ -96,8 +97,7 @@ public class GUI
 		    			
 		    edge.setAttribute("ui.color", passages);
 		}
-	}
-			
+	}		
 	
 	// function to slow down the display
     public void sleep(int millis) {
@@ -106,5 +106,47 @@ public class GUI
         } catch (Exception e) {
         	e.printStackTrace();
         }
-    }		
+    }	
+    
+    
+    // Plot mean squared error between two traffic measures
+    public static void displayMSE(int[][] pred_traffic, int[][] real_traffic)
+    {
+    	ChartSeries1DMeasure m = new ChartSeries1DMeasure("Mean squared error");
+    	double[] error = getMSE(pred_traffic, real_traffic);
+
+    	for (int i = 0; i < 100; i++)
+    	{
+    		m.addValue(error[i]);
+    	}
+    	
+    	try
+    	{
+    		m.plot();
+    	} 
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    
+    // Calculate mean squared error between two traffic measures
+    public static double[] getMSE(int[][] pred_traffic, int[][] real_traffic)
+    {
+    	double[] error = new double[pred_traffic.length];
+    	int features = pred_traffic[0].length;
+    	
+    	for(int i = 0; i < pred_traffic.length; i++)
+    	{
+    		for(int j = 0; j < features; j++)
+    		{
+    			error[i] += Math.pow(pred_traffic[i][j] + real_traffic[i][j], 2);
+    		}
+    		
+    		error[i] /= features;
+    	}
+    	
+    	return error;
+    }
+   
 }
