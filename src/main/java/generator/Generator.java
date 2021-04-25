@@ -207,18 +207,18 @@ public class Generator {
     	int[][] real_traffic = TrafficTranslator.csvToArray(real_file);
     	
     	String[] timestamps = TrafficTranslator.getTimestamps(pred_file); 	
-    	double[] error = GUI.getMSE(pred_traffic, real_traffic);
+    	double[] error = GUI.getMAE(pred_traffic, real_traffic);
     	
-    	int start = 10;
+    	int start = 0;
     	
         // Display paths
         for(int i = start; i < pred_traffic.length; i++)
         {
-        	System.out.println("Error at " + timestamps[i] + ": " + error[i]);
+        	System.out.println("MAE at " + timestamps[i] + " : " + error[i]);
         	view.displayTraffic(pred_traffic, i, (float) Math.log(nbAgents));
         	view2.displayTraffic(real_traffic, i, (float) Math.log(nbAgents));
-        	view.sleep(1000);
-        	view2.sleep(1000);
+        	view.sleep(300);
+        	view2.sleep(300);
         }
 
     }

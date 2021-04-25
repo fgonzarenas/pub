@@ -109,11 +109,11 @@ public class GUI
     }	
     
     
-    // Plot mean squared error between two traffic measures
-    public static void displayMSE(int[][] pred_traffic, int[][] real_traffic)
+    // Plot mean absolute error between two traffic measures
+    public static void displayMAE(int[][] pred_traffic, int[][] real_traffic)
     {
     	ChartSeries1DMeasure m = new ChartSeries1DMeasure("Mean squared error");
-    	double[] error = getMSE(pred_traffic, real_traffic);
+    	double[] error = getMAE(pred_traffic, real_traffic);
 
     	for (int i = 0; i < 100; i++)
     	{
@@ -130,8 +130,8 @@ public class GUI
     	}
     }
     
-    // Calculate mean squared error between two traffic measures
-    public static double[] getMSE(int[][] pred_traffic, int[][] real_traffic)
+    // Calculate mean absolute error between two traffic measures
+    public static double[] getMAE(int[][] pred_traffic, int[][] real_traffic)
     {
     	double[] error = new double[pred_traffic.length];
     	int features = pred_traffic[0].length;
@@ -140,7 +140,7 @@ public class GUI
     	{
     		for(int j = 0; j < features; j++)
     		{
-    			error[i] += Math.pow(pred_traffic[i][j] + real_traffic[i][j], 2);
+    			error[i] += Math.abs(pred_traffic[i][j] + real_traffic[i][j]);
     		}
     		
     		error[i] /= features;
