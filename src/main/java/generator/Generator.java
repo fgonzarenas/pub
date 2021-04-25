@@ -37,8 +37,8 @@ public class Generator {
 		view.init();
 		graph = view.getGraph();
 		
-		startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
-		endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
+		startNodes = new ArrayList<String>(Arrays.asList("M"));//new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
+		endNodes =  new ArrayList<String>(Arrays.asList("B")); //new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
 		idCounter = 1;
 		
 		nbAgent = nbA;
@@ -92,19 +92,19 @@ public class Generator {
 			Calendar travelCalendar = (Calendar) startCal.clone();
 						
 			// agent takes the same path often but sometimes goes to another destination
-			if(random.nextInt(7) < 5) {
+			if(random.nextInt(7) < 4) {
 				path = shortestPath(start,end);
 				travelCalendar.add(Calendar.MINUTE, random.nextInt(5));
 			} else {
-				/*
+				
 				// agent does not travel sometimes
 				if(random.nextInt(3) < 1) {
 					continue;
-				}*/
+				}
 				
 				// go to random destination at random time
 				path = shortestPath(start, endNodes.get(random.nextInt(endNodes.size())));
-				travelCalendar.add(Calendar.HOUR, random.nextInt(12));
+				travelCalendar.add(Calendar.HOUR, random.nextInt(2));
 				travelCalendar.add(Calendar.MINUTE, random.nextInt(60));
 			}
 			

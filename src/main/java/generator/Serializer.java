@@ -56,11 +56,11 @@ public class Serializer {
 		int startMonth = 0;
 		int startDay = 1;
 		int startHour = 6;
-		int endHour = 10;
+		int endHour = 12;
 		
-		Generator g = new Generator(300, 1, startYear, startMonth, startDay, startHour, endHour);
+		Generator g = new Generator(300, 30, startYear, startMonth, startDay, startHour, endHour);
 		
-		Serializer s = new Serializer("test_serial.json");
+		Serializer s = new Serializer("one_path.json");
 		s.addGenerator(g);
 		s.run();
 		s.serialize();
