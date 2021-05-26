@@ -34,15 +34,15 @@ public class Generator {
 	
 	
 	public Generator(int nbA, int nbP, int startY, int startM, int startD, int startH, int endH) {
-		//view = new GUI("GraphTest.dgs");
-		view = new GUI("1lane.dgs");
+		view = new GUI("GraphTest.dgs");
+		//view = new GUI("1lane.dgs");
 		view.init();
 		graph = view.getGraph();
 		
-		//startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
-		//endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
-		startNodes = new ArrayList<String>(Arrays.asList("A"));
-		endNodes = new ArrayList<String>(Arrays.asList("B"));
+		startNodes = new ArrayList<String>(Arrays.asList("I","J","K","L","M","O","P","Q","R"));
+		endNodes = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","N"));
+		//startNodes = new ArrayList<String>(Arrays.asList("A"));
+		//endNodes = new ArrayList<String>(Arrays.asList("B"));
 		idCounter = 1;
 		
 		nbAgent = nbA;
@@ -98,7 +98,7 @@ public class Generator {
 			path = shortestPath(start,end);
 			travelCalendar.add(Calendar.MINUTE, random.nextInt(10));
 			// agent takes the same path often but sometimes goes to another destination
-			/*
+			
 			if(random.nextInt(7) < 5) {
 				path = shortestPath(start,end);
 				travelCalendar.add(Calendar.MINUTE, random.nextInt(5));
@@ -114,7 +114,7 @@ public class Generator {
 				travelCalendar.add(Calendar.HOUR_OF_DAY, random.nextInt(12));
 				travelCalendar.add(Calendar.MINUTE, random.nextInt(60));
 			}
-			*/
+			
 			
 			travelCalendar.add(Calendar.DATE, i);			
 			travelCalendar.add(Calendar.SECOND, random.nextInt(60));
@@ -301,8 +301,7 @@ public class Generator {
         g.writeCSV(listAgent, "traffic_data_1lane.csv");
         
         	
-        // Display paths
-        /*
+        // Display paths on the GUI
         for(Agent agent : listAgent)
         {	
         	for(GenPath gp : agent.getPath())
@@ -333,7 +332,7 @@ public class Generator {
         g.graph.edges().forEach(edge -> {
         	edge.setAttribute("ui.color", ((float) edge.getNumber("ui.color")) / (g.nbAgent * g.nbPath));
     	});
-    	*/
+    	
         
         /*
         Serializer s = new Serializer("variance2.json");

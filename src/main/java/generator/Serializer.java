@@ -32,7 +32,7 @@ public class Serializer {
 	
 	public void run() {
 		// generation of agent
-		listAgent = generator.generate();
+		listAgent = new ArrayList<Agent>(generator.generate());
 	}
 	
 	public void setListAgent(ArrayList<Agent> list) {
@@ -58,7 +58,7 @@ public class Serializer {
 		int startHour = 6;
 		int endHour = 10;
 		
-		Generator g = new Generator(300, 1, startYear, startMonth, startDay, startHour, endHour);
+		Generator g = new Generator(50, 10, startYear, startMonth, startDay, startHour, endHour);
 		
 		Serializer s = new Serializer("test_serial.json");
 		s.addGenerator(g);
